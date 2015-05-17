@@ -25,7 +25,7 @@ class SystemNavigation
           Instruction.parse(instruction)
         end
       else
-        AttrInstruction.parse(@method, ivar) || []
+        Instruction::AttrInstruction.parse(@method, ivar) || []
       end
     end
   end
