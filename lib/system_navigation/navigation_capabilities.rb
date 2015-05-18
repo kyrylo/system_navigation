@@ -1,5 +1,34 @@
 class SystemNavigation
   module NavigationCapabilities
+    refine Array do
+      # Thanks, Rails.
+      def split(value = nil)
+        if block_given?
+          inject([[]]) do |results, element|
+            if yield(element)
+              results << []
+            else
+              results.last << element
+            end
+
+            results
+          end
+        else
+          results, arr = [[]], self.dup
+          until arr.empty?
+            if (idx = arr.index(value))
+              results.last.concat(arr.shift(idx))
+              arr.shift
+              results << []
+            else
+              results.last.concat(arr.shift(arr.size))
+            end
+          end
+          results
+        end
+      end
+    end
+
     refine UnboundMethod do
       def decoder_class
         InstructionStream::Decoder
@@ -14,9 +43,9 @@ class SystemNavigation
       end
 
       def writes_field?(ivar)
-         scanner = InstructionStream.on(self)
-         scanner.decode
-         scanner.scan_for(self.decoder_class.ivar_write_scan(_for: ivar, with: scanner))
+        scanner = InstructionStream.on(self)
+        scanner.decode
+        scanner.scan_for(self.decoder_class.ivar_write_scan(_for: ivar, with: scanner))
       end
     end
 
@@ -64,7 +93,19 @@ class SystemNavigation
       end
 
       def selectors
-        self.instance_methods(false) + self.private_instance_methods(false)
+        ancestors = (self.ancestors - [self]).split(self.superclass).first
+        ancestor_methods = if ancestors
+                             ancestors.map do |mod|
+                               mod.instance_methods(false) +
+                                 mod.private_instance_methods(false)
+                             end.flatten
+                           else
+                             []
+                           end
+
+        self.instance_methods(false) +
+          self.private_instance_methods(false) +
+          ancestor_methods
       end
     end
   end

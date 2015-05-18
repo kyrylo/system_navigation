@@ -1,6 +1,14 @@
 require_relative 'helper'
 
 class TestSystemNavigation < Minitest::Test
+  module Helper
+    def access(ivar, klass)
+      @sn.all_accesses(to: ivar, from: klass).sort_by(&:hash)
+    end
+  end
+
+  include Helper
+
   def setup
     @sn = SystemNavigation.default
   end
@@ -75,7 +83,6 @@ class TestSystemNavigation < Minitest::Test
       end
     end
 
-    actual_methods = @sn.all_accesses(to: :@ivar, from: test_class).sort_by(&:hash)
     expected_methods = [
       parent_class.instance_method(:ivar),
       parent_class.instance_method(:dynamic_read),
@@ -88,10 +95,9 @@ class TestSystemNavigation < Minitest::Test
       child_class.instance_method(:eval_read),
       child_class.instance_method(:ivar=),
     ].sort_by(&:hash)
-    assert_equal expected_methods, actual_methods
 
-    methods = @sn.all_accesses(to: :@nonexisting, from: test_class)
-    assert_equal [], methods
+    assert_equal expected_methods, access(:@ivar, test_class)
+    assert_equal [], access(:@nonexisting, test_class)
   end
 
   def test_all_accesses_private
@@ -111,14 +117,13 @@ class TestSystemNavigation < Minitest::Test
       end
     end
 
-    actual_methods = @sn.all_accesses(to: :@ivar, from: test_class).sort_by(&:hash)
     expected_methods = [
       test_class.instance_method(:initialize),
       test_class.instance_method(:private_write),
       test_class.instance_method(:private_read),
     ].sort_by(&:hash)
 
-    assert_equal expected_methods, actual_methods
+    assert_equal expected_methods, access(:@ivar, test_class)
   end
 
   def test_all_accesses_fuzzy_match
@@ -132,12 +137,48 @@ class TestSystemNavigation < Minitest::Test
       end
     end
 
-    actual_methods = @sn.all_accesses(to: :'@', from: test_class)
-    assert_equal [], actual_methods
+    assert_equal [], access(:'@', test_class)
   end
 
   def test_all_accesses_basicobject_fuzzy
-    actual_methods = @sn.all_accesses(to: :'@', from: BasicObject)
-    assert_equal [], actual_methods
+    assert_equal [], access(:'@', BasicObject)
+  end
+
+  def test_all_accesses_extend_include_prepend
+    test_module_ext = Module.new do
+      def ext
+        @ivar = 1
+      end
+    end
+
+    test_module_incl = Module.new do
+      def incl
+        @ivar
+      end
+    end
+
+    test_module_prep = Module.new do
+      def prep
+        @ivar = 1
+        @ivar
+      end
+    end
+
+    test_class = Class.new do
+      extend test_module_ext
+      include test_module_incl
+      prepend test_module_prep
+    end
+
+    expected_methods = [
+      test_class.instance_method(:incl),
+      test_class.instance_method(:prep),
+    ].sort_by(&:hash)
+    assert_equal expected_methods, access(:@ivar, test_class)
+
+    expected_methods = [
+      test_class.singleton_class.instance_method(:ext),
+    ].sort_by(&:hash)
+    assert_equal expected_methods, access(:@ivar, test_class.singleton_class)
   end
 end
