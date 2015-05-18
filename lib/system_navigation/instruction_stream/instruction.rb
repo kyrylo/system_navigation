@@ -25,7 +25,7 @@ class SystemNavigation
       end
 
       def gets_ivar?(ivar)
-        getinstancevariable? && @unparsed =~ /\A:#{ivar}/
+        getinstancevariable? && @unparsed =~ /\A:#{ivar},/
       end
 
       def dynamically_gets_ivar?(ivar)
@@ -53,7 +53,7 @@ class SystemNavigation
       end
 
       def writes_ivar?(ivar)
-        setinstancevariable? && @unparsed =~ /\A:#{ivar}/
+        setinstancevariable? && @unparsed =~ /\A:#{ivar},/
       end
 
       private

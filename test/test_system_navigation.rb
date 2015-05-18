@@ -120,4 +120,19 @@ class TestSystemNavigation < Minitest::Test
 
     assert_equal expected_methods, actual_methods
   end
+
+  def test_all_accesses_fuzzy_match
+    test_class = Class.new do
+      def initialize(ivar)
+        @ivar = ivar
+      end
+
+      private def check
+        @ivar.succ
+      end
+    end
+
+    actual_methods = @sn.all_accesses(to: :'@', from: test_class)
+    assert_equal [], actual_methods
+  end
 end
