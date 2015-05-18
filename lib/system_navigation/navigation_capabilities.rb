@@ -36,7 +36,7 @@ class SystemNavigation
       # Answer an Array of the receiver, the receiver's descendent's, and the
       # receiver's descendent's subclasses.
       def with_all_subclasses(&block)
-        self.all_subclasses.push(self).itself
+        self.all_subclasses.push(self)
       end
 
       def all_subclasses
