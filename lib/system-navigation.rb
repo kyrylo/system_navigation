@@ -1,4 +1,3 @@
-require 'set'
 require 'English'
 
 require 'system_navigation/instruction_stream'
