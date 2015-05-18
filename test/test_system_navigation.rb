@@ -135,4 +135,9 @@ class TestSystemNavigation < Minitest::Test
     actual_methods = @sn.all_accesses(to: :'@', from: test_class)
     assert_equal [], actual_methods
   end
+
+  def test_all_accesses_basicobject_fuzzy
+    actual_methods = @sn.all_accesses(to: :'@', from: BasicObject)
+    assert_equal [], actual_methods
+  end
 end

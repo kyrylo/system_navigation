@@ -45,7 +45,7 @@ class SystemNavigation
       end
 
       def putobjects?(str)
-        putobject? && @unparsed =~ /\A:#{str}/
+        putobject? && @unparsed =~ /\A:#{str}\z/
       end
 
       def evaling_str
