@@ -64,13 +64,7 @@ class SystemNavigation
       end
 
       def selectors
-        s = self.instance_methods(false)
-
-        if self.respond_to?(:new)
-          s << :initialize
-        end
-
-        s
+        self.instance_methods(false) + self.private_instance_methods(false)
       end
     end
   end

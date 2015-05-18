@@ -84,7 +84,6 @@ class TestSystemNavigation < Minitest::Test
       test_class.instance_method(:read_and_write),
       test_class.instance_method(:mixed_write),
       test_class.instance_method(:nested_eval),
-      child_class.instance_method(:initialize),
       child_class.instance_method(:method_read),
       child_class.instance_method(:eval_read),
       child_class.instance_method(:ivar=),
@@ -93,5 +92,32 @@ class TestSystemNavigation < Minitest::Test
 
     methods = @sn.all_accesses(to: :@nonexisting, from: test_class)
     assert_equal [], methods
+  end
+
+  def test_all_accesses_private
+    test_class = Class.new do
+      def initialize(ivar)
+        @ivar = ivar
+      end
+
+      private
+
+      def private_read
+        @ivar
+      end
+
+      def private_write
+        @ivar = 11
+      end
+    end
+
+    actual_methods = @sn.all_accesses(to: :@ivar, from: test_class).sort_by(&:hash)
+    expected_methods = [
+      test_class.instance_method(:initialize),
+      test_class.instance_method(:private_write),
+      test_class.instance_method(:private_read),
+    ].sort_by(&:hash)
+
+    assert_equal expected_methods, actual_methods
   end
 end
