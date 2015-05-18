@@ -50,6 +50,10 @@ class TestSystemNavigation < Minitest::Test
         self.instance_variable_set(:@ivar, 69)
       end
 
+      def nested_eval
+        eval("eval('@ivar')")
+      end
+
       def random
         :empty
       end
@@ -79,6 +83,7 @@ class TestSystemNavigation < Minitest::Test
       test_class.instance_method(:initialize),
       test_class.instance_method(:read_and_write),
       test_class.instance_method(:mixed_write),
+      test_class.instance_method(:nested_eval),
       child_class.instance_method(:initialize),
       child_class.instance_method(:method_read),
       child_class.instance_method(:eval_read),
