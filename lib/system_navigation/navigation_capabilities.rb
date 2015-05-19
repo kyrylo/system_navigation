@@ -3,29 +3,17 @@ class SystemNavigation
     refine Array do
       # Thanks, Rails.
       def split(value = nil)
-        if block_given?
-          inject([[]]) do |results, element|
-            if yield(element)
-              results << []
-            else
-              results.last << element
-            end
-
-            results
+        results, arr = [[]], self.dup
+        until arr.empty?
+          if (idx = arr.index(value))
+            results.last.concat(arr.shift(idx))
+            arr.shift
+            results << []
+          else
+            results.last.concat(arr.shift(arr.size))
           end
-        else
-          results, arr = [[]], self.dup
-          until arr.empty?
-            if (idx = arr.index(value))
-              results.last.concat(arr.shift(idx))
-              arr.shift
-              results << []
-            else
-              results.last.concat(arr.shift(arr.size))
-            end
-          end
-          results
         end
+        results
       end
     end
 
