@@ -1,10 +1,10 @@
 require 'English'
 
-require 'system_navigation/instruction_stream'
-require 'system_navigation/instruction_stream/decoder'
-require 'system_navigation/instruction_stream/instruction'
-require 'system_navigation/instruction_stream/instruction/attr_instruction'
-require 'system_navigation/navigation_capabilities'
+require_relative 'system_navigation/instruction_stream'
+require_relative 'system_navigation/instruction_stream/decoder'
+require_relative 'system_navigation/instruction_stream/instruction'
+require_relative 'system_navigation/instruction_stream/instruction/attr_instruction'
+require_relative 'system_navigation/navigation_capabilities'
 
 class SystemNavigation
   # The VERSION file must be in the root directory of the library.
