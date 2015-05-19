@@ -2,7 +2,7 @@ class SystemNavigation
   module NavigationCapabilities
     refine Array do
       # Thanks, Rails.
-      def split(value = nil)
+      def split(value)
         results, arr = [[]], self.dup
         until arr.empty?
           if (idx = arr.index(value))
