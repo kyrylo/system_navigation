@@ -5,6 +5,10 @@ class TestSystemNavigation < Minitest::Test
     def access(ivar, klass)
       @sn.all_accesses(to: ivar, from: klass).sort_by(&:hash)
     end
+
+    def calls_on(sym)
+      @sn.all_calls_on(sym).sort_by(&:hash)
+    end
   end
 
   include Helper
@@ -204,8 +208,7 @@ class TestSystemNavigation < Minitest::Test
       singleton_test_class.singleton_class.instance_method(:single),
       self.class.instance_method(__method__)
     ].sort_by(&:hash)
-    actual_methods = @sn.all_calls_on(:drum_n_bass_yo).sort_by(&:hash)
-    assert_equal expected_methods, actual_methods
+    assert_equal expected_methods, calls_on(:drum_n_bass_yo)
   end
 
   def test_all_calls_on_accessors
@@ -230,17 +233,14 @@ class TestSystemNavigation < Minitest::Test
       another_test_class.instance_method(:comrade_joseph_koba_stalin),
       self.class.instance_method(__method__)
     ].sort_by(&:hash)
-
-    actual_methods = @sn.all_calls_on(:comrade_joseph_koba_stalin).sort_by(&:hash)
-    assert_equal expected_methods, actual_methods
+    assert_equal expected_methods, calls_on(:comrade_joseph_koba_stalin)
 
     expected_methods = [
       test_class.instance_method(:comrade_joseph_koba_stalin=),
       and_another_test_class.instance_method(:comrade_joseph_koba_stalin=),
       self.class.instance_method(__method__)
     ].sort_by(&:hash)
-    actual_methods = @sn.all_calls_on(:comrade_joseph_koba_stalin=).sort_by(&:hash)
-    assert_equal expected_methods, actual_methods
+    assert_equal expected_methods, calls_on(:comrade_joseph_koba_stalin=)
   end
 
   def test_all_calls_on_simple_hash
@@ -263,15 +263,13 @@ class TestSystemNavigation < Minitest::Test
       test_class.instance_method(:piggy),
       self.class.instance_method(__method__)
     ].sort_by(&:hash)
-    actual_methods = @sn.all_calls_on(:comrade_vladimir_lenin_ulyanov).sort_by(&:hash)
-    assert_equal expected_methods, actual_methods
+    assert_equal expected_methods, calls_on(:comrade_vladimir_lenin_ulyanov)
 
     expected_methods = [
       another_test_class.instance_method(:biggy),
       self.class.instance_method(__method__)
     ].sort_by(&:hash)
-    actual_methods = @sn.all_calls_on(:comrade_lavrentiy_pavlovich_beria).sort_by(&:hash)
-    assert_equal expected_methods, actual_methods
+    assert_equal expected_methods, calls_on(:comrade_lavrentiy_pavlovich_beria)
   end
 
   def test_all_calls_on_eval
@@ -290,7 +288,6 @@ class TestSystemNavigation < Minitest::Test
         test_class.instance_method(:nested_eval),
         self.class.instance_method(__method__)
       ].sort_by(&:hash)
-      actual_methods = @sn.all_calls_on(:marshal_zhukov).sort_by(&:hash)
-      assert_equal expected_methods, actual_methods
+      assert_equal expected_methods, calls_on(:marshal_zhukov)
   end
 end
