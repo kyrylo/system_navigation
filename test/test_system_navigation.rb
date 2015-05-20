@@ -181,4 +181,74 @@ class TestSystemNavigation < Minitest::Test
     ].sort_by(&:hash)
     assert_equal expected_methods, access(:@ivar, test_class.singleton_class)
   end
+
+  def test_all_calls_on
+    test_class = Class.new do
+      def drum
+        :drum_n_bass_yo
+      end
+
+      def none
+        @none
+      end
+    end
+
+    another_test_class = Class.new do
+      def boom
+        :drum_n_bass_yo
+      end
+    end
+
+    singleton_test_class = Class.new do
+      class << self
+        def single
+          :drum_n_bass_yo
+        end
+      end
+    end
+
+    expected_methods = [
+      test_class.instance_method(:drum),
+      another_test_class.instance_method(:boom),
+      singleton_test_class.singleton_class.instance_method(:single),
+      self.class.instance_method(__method__)
+    ].sort_by(&:hash)
+    actual_methods = @sn.all_calls_on(:drum_n_bass_yo).sort_by(&:hash)
+    assert_equal expected_methods, actual_methods
+  end
+
+  def test_all_calls_on_accessors
+    test_class = Class.new do
+      attr_accessor :comrade_joseph_koba_stalin
+
+      def fluffy
+        :fluffy
+      end
+    end
+
+    another_test_class = Class.new do
+      attr_reader :comrade_joseph_koba_stalin
+    end
+
+    and_another_test_class = Class.new do
+      attr_writer :comrade_joseph_koba_stalin
+    end
+
+    expected_methods = [
+      test_class.instance_method(:comrade_joseph_koba_stalin),
+      another_test_class.instance_method(:comrade_joseph_koba_stalin),
+      self.class.instance_method(__method__)
+    ].sort_by(&:hash)
+
+    actual_methods = @sn.all_calls_on(:comrade_joseph_koba_stalin).sort_by(&:hash)
+    assert_equal expected_methods, actual_methods
+
+    expected_methods = [
+      test_class.instance_method(:comrade_joseph_koba_stalin=),
+      and_another_test_class.instance_method(:comrade_joseph_koba_stalin=),
+      self.class.instance_method(__method__)
+    ].sort_by(&:hash)
+    actual_methods = @sn.all_calls_on(:comrade_joseph_koba_stalin=).sort_by(&:hash)
+    assert_equal expected_methods, actual_methods
+  end
 end

@@ -35,9 +35,15 @@ class SystemNavigation
         scanner.decode
         scanner.scan_for(self.decoder_class.ivar_write_scan(_for: ivar, with: scanner))
       end
+
+      def has_literal?(literal)
+        scanner = InstructionStream.on(self)
+        scanner.decode
+        scanner.scan_for(self.decoder_class.literal_scan(_for: literal, with: scanner))
+      end
     end
 
-    refine Class do
+    refine Module do
       def with_all_sub_and_superclasses(&block)
         self.with_all_subclasses_do(&block)
         self.all_superclasses_do(&block)
@@ -81,19 +87,59 @@ class SystemNavigation
       end
 
       def selectors
-        ancestors = (self.ancestors - [self]).split(self.superclass).first
-        ancestor_methods = if ancestors
-                             ancestors.map do |mod|
-                               mod.instance_methods(false) +
-                                 mod.private_instance_methods(false)
-                             end.flatten
-                           else
-                             []
-                           end
+        [self.all_method_selectors, self.ancestor_selectors].flatten
+      end
 
-        self.instance_methods(false) +
-          self.private_instance_methods(false) +
-          ancestor_methods
+      def closest_ancestors
+        ancestors_list = self.ancestors - [self]
+
+        if self.is_a?(Class)
+          ancestors_list.split(self.superclass).first || []
+        else
+          ancestors_list
+        end
+      end
+
+      def ancestor_selectors
+        if closest_ancestors.any?
+          closest_ancestors.flat_map { |ancestor| ancestor.all_method_selectors }
+        else
+          []
+        end
+      end
+
+      def which_selectors_refer_to(literal)
+        who = []
+
+        self.selectors_and_methods do |selector, method|
+          if method.has_literal?(literal)
+            who << selector
+          end
+        end
+
+        who
+      end
+
+      def thorough_which_selectors_refer_to(literal)
+        []
+      end
+
+      def selectors_and_methods(&block)
+        self.method_hash.each_pair do |selector, method|
+          block.call(selector, method)
+        end
+      end
+
+      def method_hash
+        Hash[self.all_methods.map { |method| [method.original_name, method] }]
+      end
+
+      def all_method_selectors
+        self.instance_methods(false) + self.private_instance_methods(false)
+      end
+
+      def all_methods
+        selectors.map { |selector| self.instance_method(selector) }
       end
     end
   end

@@ -35,6 +35,22 @@ class SystemNavigation
         end
       end
 
+      def self.literal_scan(_for:, with:)
+        name = with.unbound_method.original_name
+
+        self.with_iseq(_for: name, with: with) do |iseqs, instruction, idx|
+          if instruction.putobjects?(_for) || instruction.kind_of?(Instruction::AttrInstruction)
+            next(instruction) if instruction.putobjects?(_for)
+
+            prev_instruction = iseqs[idx.pred]
+
+            next unless performs_an_eval?(_for, instruction, prev_instruction)
+
+            ivar_write_scan(_for: _for, with: iseq_from_eval(prev_instruction)).any?
+          end
+        end
+      end
+
       private
 
       def self.performs_an_eval?(_for, instruction, prev_instruction)

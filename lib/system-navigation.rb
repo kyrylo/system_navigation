@@ -1,4 +1,5 @@
 require 'English'
+require 'set'
 
 require_relative 'system_navigation/instruction_stream'
 require_relative 'system_navigation/instruction_stream/decoder'
@@ -7,6 +8,16 @@ require_relative 'system_navigation/instruction_stream/instruction/attr_instruct
 require_relative 'system_navigation/navigation_capabilities'
 
 class SystemNavigation
+  class RubyEnvironment
+    # Execute block on each class, metaclass, module and module's metaclass.
+    def all_behaviors
+      ObjectSpace.each_object(Module) do |klass|
+        yield klass
+        yield klass.singleton_class
+      end
+    end
+  end
+
   # The VERSION file must be in the root directory of the library.
   VERSION_FILE = File.expand_path('../../VERSION', __FILE__)
 
@@ -19,6 +30,10 @@ class SystemNavigation
     self.new
   end
 
+  def initialize
+    @environment = SystemNavigation::RubyEnvironment.new
+  end
+
   def all_accesses(to:, from:)
     accesses = []
 
@@ -29,5 +44,24 @@ class SystemNavigation
     end
 
     accesses
+  end
+
+  def all_calls_on(sym)
+    all_references_to(sym)
+  end
+
+  def all_references_to(literal)
+    result = []
+
+    self.all_behaviors do |klass|
+      selectors = klass.which_selectors_refer_to(literal)
+      selectors.each { |sel| result << klass.instance_method(sel) }
+    end
+
+    result
+  end
+
+  def all_behaviors(&block)
+    @environment.all_behaviors(&block)
   end
 end

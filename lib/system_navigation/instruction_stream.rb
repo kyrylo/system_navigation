@@ -17,7 +17,7 @@ class SystemNavigation
       selected_instructs.any?
     end
 
-    def iseqs(ivar)
+    def iseqs(sym)
       iseqs = @iseq.split("\n")
 
       if iseqs.any?
@@ -25,8 +25,12 @@ class SystemNavigation
           Instruction.parse(instruction)
         end
       else
-        Instruction::AttrInstruction.parse(@method, ivar) || []
+        Instruction::AttrInstruction.parse(@method, sym) || []
       end
+    end
+
+    def unbound_method
+      @method
     end
   end
 end
