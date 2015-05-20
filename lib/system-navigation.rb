@@ -1,5 +1,4 @@
 require 'English'
-require 'set'
 require 'forwardable'
 
 require_relative 'system_navigation/array_utils'
