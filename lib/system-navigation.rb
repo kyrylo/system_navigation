@@ -20,7 +20,9 @@ class SystemNavigation
   using ModuleUtils
 
   extend Forwardable
-  def_delegator :@environment, :all_behaviors
+  def_delegators :@environment,
+                 :all_behaviors, :all_classes, :all_classes_and_modules,
+                 :all_modules
 
   def self.default
     self.new
@@ -45,7 +47,7 @@ class SystemNavigation
         selectors.map { |sel| klass.instance_method(sel) }
       end
     else
-      all_references_to(on)
+      self.all_references_to(on)
     end
   end
 
