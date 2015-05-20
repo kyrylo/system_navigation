@@ -9,24 +9,25 @@ class SystemNavigation
         self.all_superclasses_do(&block)
       end
 
-      # Evaluate the block, for the receiver and each of its subclasses.
       def with_all_subclasses_do(&block)
         self.with_all_subclasses.each do |subclass|
           block.call(subclass)
         end
       end
 
-      # Answer an Array of the receiver, the receiver's descendent's, and the
-      # receiver's descendent's subclasses.
+      # Answer an Array of the receiver, the receiver's descendents, and the
+      # receiver's descendents subclasses.
       def with_all_subclasses(&block)
         self.all_subclasses.push(self)
       end
 
       def all_subclasses
         all_subclasses = []
+
         ObjectSpace.each_object(singleton_class) do |klass|
           all_subclasses.unshift(klass) if klass != self
         end
+
         all_subclasses
       end
 
@@ -37,8 +38,8 @@ class SystemNavigation
         end
       end
 
-      # Answer a set of selectors whose methods access the argument,
-      # ivar, as a named instance variable.
+      # Answer a set of selectors whose methods access the argument, ivar, as a
+      # named instance variable.
       def which_selectors_access(ivar)
         selectors.select do |sel|
           meth = self.instance_method(sel)
