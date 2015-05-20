@@ -1,49 +1,9 @@
 class SystemNavigation
-  module NavigationCapabilities
-    refine Array do
-      # Thanks, Rails.
-      def split(value)
-        results, arr = [[]], self.dup
-        until arr.empty?
-          if (idx = arr.index(value))
-            results.last.concat(arr.shift(idx))
-            arr.shift
-            results << []
-          else
-            results.last.concat(arr.shift(arr.size))
-          end
-        end
-        results
-      end
-    end
-
-    refine UnboundMethod do
-      def decoder_class
-        InstructionStream::Decoder
-      end
-
-      # Answer whether the receiver loads the instance variable indexed by the
-      # argument.
-      def reads_field?(ivar)
-        scanner = InstructionStream.on(self)
-        scanner.decode
-        scanner.scan_for(self.decoder_class.ivar_read_scan(_for: ivar, with: scanner))
-      end
-
-      def writes_field?(ivar)
-        scanner = InstructionStream.on(self)
-        scanner.decode
-        scanner.scan_for(self.decoder_class.ivar_write_scan(_for: ivar, with: scanner))
-      end
-
-      def has_literal?(literal)
-        scanner = InstructionStream.on(self)
-        scanner.decode
-        scanner.scan_for(self.decoder_class.literal_scan(_for: literal, with: scanner))
-      end
-    end
-
+  module ModuleUtils
     refine Module do
+      using ArrayUtils
+      using UnboundMethodUtils
+
       def with_all_sub_and_superclasses(&block)
         self.with_all_subclasses_do(&block)
         self.all_superclasses_do(&block)

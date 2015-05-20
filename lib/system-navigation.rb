@@ -2,12 +2,14 @@ require 'English'
 require 'set'
 require 'forwardable'
 
+require_relative 'system_navigation/array_utils'
+require_relative 'system_navigation/unbound_method_utils'
+require_relative 'system_navigation/module_utils'
+require_relative 'system_navigation/ruby_environment'
 require_relative 'system_navigation/instruction_stream'
 require_relative 'system_navigation/instruction_stream/decoder'
 require_relative 'system_navigation/instruction_stream/instruction'
 require_relative 'system_navigation/instruction_stream/instruction/attr_instruction'
-require_relative 'system_navigation/navigation_capabilities'
-require_relative 'system_navigation/ruby_environment'
 
 class SystemNavigation
   # The VERSION file must be in the root directory of the library.
@@ -16,7 +18,7 @@ class SystemNavigation
   VERSION = File.exist?(VERSION_FILE) ?
               File.read(VERSION_FILE).chomp : '(could not find VERSION file)'
 
-  using NavigationCapabilities
+  using ModuleUtils
 
   extend Forwardable
   def_delegator :@environment, :all_behaviors
