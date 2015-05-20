@@ -32,15 +32,11 @@ class SystemNavigation
   end
 
   def all_accesses(to:, from:)
-    accesses = []
-
-    from.with_all_sub_and_superclasses do |klass|
-      klass.which_selectors_access(to).each do |sel|
-        accesses.push(klass.instance_method(sel))
+    from.with_all_sub_and_superclasses.flat_map do |klass|
+      klass.which_selectors_access(to).map do |sel|
+        klass.instance_method(sel)
       end
     end
-
-    accesses
   end
 
   def all_calls(on:, from: nil)

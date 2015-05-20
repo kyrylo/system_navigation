@@ -5,8 +5,15 @@ class SystemNavigation
       using UnboundMethodUtils
 
       def with_all_sub_and_superclasses(&block)
-        self.with_all_subclasses_do(&block)
-        self.all_superclasses_do(&block)
+        if block_given?
+          self.with_all_subclasses_do.each(&block)
+          self.all_superclasses_do.each(&block)
+        else
+          Enumerator.new do |y|
+            self.with_all_subclasses_do.each { |klass| y << klass }
+            self.with_all_superclasses_do.each { |klass| y << klass }
+          end
+        end
       end
 
       def with_all_subclasses_do(&block)
@@ -37,10 +44,19 @@ class SystemNavigation
         all_subclasses
       end
 
-      def all_superclasses_do(&block)
+      def with_all_superclasses_do(&block)
         if self.superclass
-          block.call(self.superclass)
-          self.superclass.all_superclasses_do(&block)
+          if block_given?
+            block.call(self.superclass)
+            self.superclass.with_all_superclasses_do(&block)
+          else
+            Enumerator.new do |y|
+              y.yield self.superclass
+              self.superclass.with_all_superclasses_do { |klass| y << klass }
+            end
+          end
+        else
+          []
         end
       end
 
