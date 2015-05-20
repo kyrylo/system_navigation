@@ -1,7 +1,6 @@
 class SystemNavigation
   module ArrayUtils
     refine Array do
-      # Thanks, Rails.
       def split(value)
         results, arr = [[]], self.dup
 
