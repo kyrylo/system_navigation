@@ -81,10 +81,6 @@ class SystemNavigation
         who
       end
 
-      def thorough_which_selectors_refer_to(literal)
-        []
-      end
-
       def selectors_and_methods(&block)
         self.method_hash.each_pair do |selector, method|
           block.call(selector, method)
