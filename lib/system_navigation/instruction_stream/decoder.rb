@@ -39,15 +39,13 @@ class SystemNavigation
         name = with.unbound_method.original_name
 
         self.with_iseq(_for: name, with: with) do |iseqs, instruction, idx|
-          if instruction.putobjects?(_for) || instruction.kind_of?(Instruction::AttrInstruction)
-            next(instruction) if instruction.putobjects?(_for)
+          next(instruction) if instruction.putobjects?(_for) || instruction.duparrays?(_for)
 
-            prev_instruction = iseqs[idx.pred]
+          prev_instruction = iseqs[idx.pred]
 
-            next unless performs_an_eval?(_for, instruction, prev_instruction)
+          next unless performs_an_eval?(_for, instruction, prev_instruction)
 
-            ivar_write_scan(_for: _for, with: iseq_from_eval(prev_instruction)).any?
-          end
+          literal_scan(_for: _for, with: iseq_from_eval(prev_instruction, with.unbound_method)).any?
         end
       end
 
@@ -57,12 +55,12 @@ class SystemNavigation
         prev_instruction.putstrings?(_for) && instruction.evals?
       end
 
-      def self.iseq_from_eval(instruction)
+      def self.iseq_from_eval(instruction, method = nil)
         # Avoid segfault. See: https://bugs.ruby-lang.org/issues/11159
         uncompiled = instruction.evaling_str || nil.to_s
 
         iseq = RubyVM::InstructionSequence.compile(uncompiled).disasm
-        InstructionStream.new(iseq: iseq)
+        InstructionStream.new(method: method, iseq: iseq)
       end
     end
   end

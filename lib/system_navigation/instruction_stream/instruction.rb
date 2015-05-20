@@ -45,7 +45,15 @@ class SystemNavigation
       end
 
       def putobjects?(str)
-        putobject? && @unparsed =~ /\A:#{str}\z/
+        putobject? &&
+          (
+            @unparsed =~ /\A:#{str}\s*(?:\([0-9\s]+\))?\z/ ||
+            @unparsed =~ /\A\[.*:#{str}.*\]\s*(?:\([0-9\s]+\))?\z/
+          )
+      end
+
+      def duparrays?(str)
+        duparray? && @unparsed =~ /\A\[.*:#{str}.*\]\s*(?:\([0-9\s]+\))?\z/
       end
 
       def evaling_str
@@ -76,6 +84,10 @@ class SystemNavigation
 
       def setinstancevariable?
         @instruction == 'setinstancevariable'
+      end
+
+      def duparray?
+        @instruction == 'duparray'
       end
 
       def parse_pos

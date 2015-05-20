@@ -13,15 +13,6 @@ class TestSystemNavigation < Minitest::Test
     @sn = SystemNavigation.default
   end
 
-  # A shared pool represents a set of bindings which are accessible to all
-  # classes which import the pool in its 'pool dictionaries'. SharedPool is NOT
-  # a dictionary but rather a name space. Bindings are represented by 'class
-  # variables' - as long as we have no better way to represent them at least.
-  # def test_all_classes_using_shared_pool
-  #   skip
-  #   assert_equal true, true
-  # end
-
   def test_all_accesses
     parent_class = Class.new do
       attr_reader :ivar
@@ -250,5 +241,56 @@ class TestSystemNavigation < Minitest::Test
     ].sort_by(&:hash)
     actual_methods = @sn.all_calls_on(:comrade_joseph_koba_stalin=).sort_by(&:hash)
     assert_equal expected_methods, actual_methods
+  end
+
+  def test_all_calls_on_simple_hash
+    test_class = Class.new do
+      def piggy
+        {comrade_vladimir_lenin_ulyanov: 1, oinky: 2}
+      end
+    end
+
+    another_test_class = Class.new do
+      def biggy
+        {
+          bingo: [:bango, :bongo],
+          bish: [:comrade_lavrentiy_pavlovich_beria, :bosh]
+        }
+      end
+    end
+
+    expected_methods = [
+      test_class.instance_method(:piggy),
+      self.class.instance_method(__method__)
+    ].sort_by(&:hash)
+    actual_methods = @sn.all_calls_on(:comrade_vladimir_lenin_ulyanov).sort_by(&:hash)
+    assert_equal expected_methods, actual_methods
+
+    expected_methods = [
+      another_test_class.instance_method(:biggy),
+      self.class.instance_method(__method__)
+    ].sort_by(&:hash)
+    actual_methods = @sn.all_calls_on(:comrade_lavrentiy_pavlovich_beria).sort_by(&:hash)
+    assert_equal expected_methods, actual_methods
+  end
+
+  def test_all_calls_on_eval
+     test_class = Class.new do
+       def eval
+         eval(':marshal_zhukov')
+       end
+
+       def nested_eval
+         eval('eval(:marshal_zhukov)')
+       end
+     end
+
+      expected_methods = [
+        test_class.instance_method(:eval),
+        test_class.instance_method(:nested_eval),
+        self.class.instance_method(__method__)
+      ].sort_by(&:hash)
+      actual_methods = @sn.all_calls_on(:marshal_zhukov).sort_by(&:hash)
+      assert_equal expected_methods, actual_methods
   end
 end
