@@ -48,7 +48,7 @@ class SystemNavigation
   def all_references_to(literal)
     references = []
 
-    self.all_behaviors.each do |klass|
+    self.all_behaviors do |klass|
       selectors = klass.which_selectors_refer_to(literal)
       selectors.each { |sel| references.push(klass.instance_method(sel)) }
     end
