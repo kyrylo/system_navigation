@@ -273,22 +273,22 @@ class TestSystemNavigation < Minitest::Test
   end
 
   def test_all_calls_on_eval
-     test_class = Class.new do
-       def eval
-         eval(':marshal_zhukov')
-       end
+    test_class = Class.new do
+      def eval
+        eval(':marshal_zhukov')
+      end
 
-       def nested_eval
-         eval('eval(:marshal_zhukov)')
-       end
-     end
+      def nested_eval
+        eval('eval(:marshal_zhukov)')
+      end
+    end
 
-      expected_methods = [
-        test_class.instance_method(:eval),
-        test_class.instance_method(:nested_eval),
-        self.class.instance_method(__method__)
-      ].sort_by(&:hash)
-      assert_equal expected_methods, calls_on(:marshal_zhukov)
+    expected_methods = [
+      test_class.instance_method(:eval),
+      test_class.instance_method(:nested_eval),
+      self.class.instance_method(__method__)
+    ].sort_by(&:hash)
+    assert_equal expected_methods, calls_on(:marshal_zhukov)
   end
 
   def test_all_calls
@@ -326,5 +326,48 @@ class TestSystemNavigation < Minitest::Test
     ].sort_by(&:hash)
     assert_equal expected_methods,
                  @sn.all_calls(on: :woohoo, from: test_class).sort_by(&:hash)
+  end
+
+  def test_all_classes_implementing
+    test_class = Class.new do
+      def bango_bango; end
+
+      def foo; end
+    end
+
+    _test_module = Module.new do
+      def bango_bango; end
+    end
+
+    assert_equal [test_class], @sn.all_classes_implementing(:bango_bango)
+  end
+
+  def test_all_modules_implementing
+    _test_class = Class.new do
+      def bingo_bingo; end
+
+      def foo; end
+    end
+
+    test_module = Module.new do
+      def bingo_bingo; end
+    end
+
+    assert_equal [test_module], @sn.all_modules_implementing(:bingo_bingo)
+  end
+
+  def test_all_implementors_of
+    test_class = Class.new do
+      def bongo_bongo; end
+
+      def foo; end
+    end
+
+    test_module = Module.new do
+      def bongo_bongo; end
+    end
+
+    assert_equal [test_module, test_class].sort_by(&:hash),
+                 @sn.all_implementors_of(:bongo_bongo)
   end
 end

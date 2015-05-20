@@ -106,6 +106,10 @@ class SystemNavigation
       def all_methods
         selectors.map { |selector| self.instance_method(selector) }
       end
+
+      def includes_selector?(selector)
+        self.all_method_selectors.include?(selector)
+      end
     end
   end
 end

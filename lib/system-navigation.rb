@@ -51,7 +51,25 @@ class SystemNavigation
     end
   end
 
-  private
+  def all_classes_implementing(selector)
+    self.all_classes.select do |klass|
+      klass.includes_selector?(selector)
+    end
+  end
+
+  def all_modules_implementing(selector)
+    self.all_modules.select do |mod|
+      mod.includes_selector?(selector)
+    end
+  end
+
+  def all_implementors_of(selector)
+    self.all_behaviors.select do |klass|
+      klass.includes_selector?(selector)
+    end
+  end
+
+  protected
 
   def all_references_to(literal)
     self.all_behaviors.flat_map do |klass|
