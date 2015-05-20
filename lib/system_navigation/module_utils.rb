@@ -10,8 +10,14 @@ class SystemNavigation
       end
 
       def with_all_subclasses_do(&block)
-        self.with_all_subclasses.each do |subclass|
-          block.call(subclass)
+        if block_given?
+          self.with_all_subclasses.each(&block)
+        else
+          Enumerator.new do |y|
+            self.with_all_subclasses.each do |subclass|
+              y.yield subclass
+            end
+          end
         end
       end
 

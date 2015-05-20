@@ -7,7 +7,7 @@ class TestSystemNavigation < Minitest::Test
     end
 
     def calls_on(sym)
-      @sn.all_calls_on(sym).sort_by(&:hash)
+      @sn.all_calls(on: sym).sort_by(&:hash)
     end
   end
 
@@ -289,5 +289,42 @@ class TestSystemNavigation < Minitest::Test
         self.class.instance_method(__method__)
       ].sort_by(&:hash)
       assert_equal expected_methods, calls_on(:marshal_zhukov)
+  end
+
+  def test_all_calls
+    parent_class = Class.new do
+      def bingo
+        :woohoo
+      end
+    end
+
+    test_class = Class.new(parent_class) do
+      def bango
+        :woohoo
+      end
+
+      def meh
+        :meh
+      end
+    end
+
+    child_class = Class.new(test_class) do
+      def bongo
+        :woohoo
+      end
+    end
+
+    _another_test_class = Class.new do
+      def bish
+        :woohoo
+      end
+    end
+
+    expected_methods = [
+      test_class.instance_method(:bango),
+      child_class.instance_method(:bongo),
+    ].sort_by(&:hash)
+    assert_equal expected_methods,
+                 @sn.all_calls(on: :woohoo, from: test_class).sort_by(&:hash)
   end
 end

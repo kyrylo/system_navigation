@@ -43,8 +43,15 @@ class SystemNavigation
     accesses
   end
 
-  def all_calls_on(sym)
-    all_references_to(sym)
+  def all_calls(on:, from: nil)
+    if from
+      from.with_all_subclasses_do.flat_map do |klass|
+        selectors = klass.which_selectors_refer_to(on)
+        selectors.map { |sel| klass.instance_method(sel) }
+      end
+    else
+      all_references_to(on)
+    end
   end
 
   private
