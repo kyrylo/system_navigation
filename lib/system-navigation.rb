@@ -1,5 +1,6 @@
 require 'English'
 require 'set'
+require 'forwardable'
 
 require_relative 'system_navigation/instruction_stream'
 require_relative 'system_navigation/instruction_stream/decoder'
@@ -16,6 +17,9 @@ class SystemNavigation
               File.read(VERSION_FILE).chomp : '(could not find VERSION file)'
 
   using NavigationCapabilities
+
+  extend Forwardable
+  def_delegator :@environment, :all_behaviors
 
   def self.default
     self.new
@@ -42,17 +46,13 @@ class SystemNavigation
   end
 
   def all_references_to(literal)
-    result = []
+    references = []
 
-    self.all_behaviors do |klass|
+    self.all_behaviors.each do |klass|
       selectors = klass.which_selectors_refer_to(literal)
-      selectors.each { |sel| result << klass.instance_method(sel) }
+      selectors.each { |sel| references.push(klass.instance_method(sel)) }
     end
 
-    result
-  end
-
-  def all_behaviors(&block)
-    @environment.all_behaviors(&block)
+    references
   end
 end
