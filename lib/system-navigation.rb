@@ -47,6 +47,8 @@ class SystemNavigation
     all_references_to(sym)
   end
 
+  private
+
   def all_references_to(literal)
     references = []
 
