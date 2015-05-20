@@ -4,33 +4,24 @@ class SystemNavigation
       using ArrayUtils
       using UnboundMethodUtils
 
-      def with_all_sub_and_superclasses(&block)
-        if block_given?
-          self.with_all_subclasses_do.each(&block)
-          self.all_superclasses_do.each(&block)
-        else
-          Enumerator.new do |y|
-            self.with_all_subclasses_do.each { |klass| y << klass }
-            self.with_all_superclasses_do.each { |klass| y << klass }
-          end
+      def with_all_sub_and_superclasses
+        Enumerator.new do |y|
+          self.with_all_subclasses_do.each { |klass| y << klass }
+          self.with_all_superclasses_do.each { |klass| y << klass }
         end
       end
 
-      def with_all_subclasses_do(&block)
-        if block_given?
-          self.with_all_subclasses.each(&block)
-        else
-          Enumerator.new do |y|
-            self.with_all_subclasses.each do |subclass|
-              y.yield subclass
-            end
+      def with_all_subclasses_do
+        Enumerator.new do |y|
+          self.with_all_subclasses.each do |subclass|
+            y.yield subclass
           end
         end
       end
 
       # Answer an Array of the receiver, the receiver's descendents, and the
       # receiver's descendents subclasses.
-      def with_all_subclasses(&block)
+      def with_all_subclasses
         self.all_subclasses.push(self)
       end
 
@@ -44,16 +35,11 @@ class SystemNavigation
         all_subclasses
       end
 
-      def with_all_superclasses_do(&block)
+      def with_all_superclasses_do
         if self.superclass
-          if block_given?
-            block.call(self.superclass)
-            self.superclass.with_all_superclasses_do(&block)
-          else
-            Enumerator.new do |y|
-              y.yield self.superclass
-              self.superclass.with_all_superclasses_do { |klass| y << klass }
-            end
+          Enumerator.new do |y|
+            y.yield self.superclass
+            self.superclass.with_all_superclasses_do.each { |klass| y << klass }
           end
         else
           []
