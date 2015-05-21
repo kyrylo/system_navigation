@@ -113,7 +113,7 @@ class SystemNavigation
 
       def belongs_to?(gem_name)
         gemspecs = Gem::Specification.find_all_by_name(gem_name)
-        return unless gemspecs.any? || gemspecs.count != 1
+        return if gemspecs.none? || gemspecs.count != 1
         return if self.all_methods.none?
 
         gemspec = gemspecs.first
