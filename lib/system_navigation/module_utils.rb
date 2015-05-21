@@ -159,6 +159,12 @@ class SystemNavigation
                   group_by(&:itself).map{ |k,v| [k, v.count] }
         Hash[grouped]
       end
+
+      def select_matching_methods(string, match_case)
+        self.all_methods.select do |method|
+          method.owner == self && method.source_contains?(string, match_case)
+        end
+      end
     end
   end
 end

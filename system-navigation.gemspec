@@ -12,6 +12,8 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
   s.files        = `git ls-files`.split("\n")
 
+  s.add_runtime_dependency 'method_source', '~> 0.8'
+
   s.add_development_dependency 'bundler', '~> 1.9'
   s.add_development_dependency 'rake', '~> 10.4'
   s.add_development_dependency 'pry', '~> 0.10'

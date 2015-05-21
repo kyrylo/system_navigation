@@ -94,6 +94,12 @@ class SystemNavigation
     self.all_behaviors.flat_map { |klass| klass.all_methods }
   end
 
+  def all_methods_with_source(string:, match_case: true)
+    self.all_behaviors.flat_map do |klass|
+      klass.select_matching_methods(string, match_case)
+    end
+  end
+
   protected
 
   def all_references_to(literal)

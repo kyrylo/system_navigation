@@ -396,4 +396,46 @@ class TestSystemNavigation < Minitest::Test
     assert_equal expected_methods,
                  @sn.all_local_calls(on: :bingo, of_class: test_class).sort_by(&:hash)
   end
+
+  def test_all_methods_with_source
+    test_module = Module.new do
+      def bingo
+        'dworkin_barimen'
+      end
+    end
+
+    parent_class = Class.new do
+      include test_module
+
+      def bango
+        dworkin_barimen
+      end
+    end
+
+    test_class = Class.new(parent_class) do
+      def bongo
+        :dworkin_barimen
+      end
+
+      # dworkin_barimen
+      def bish
+        :bar
+        :baz
+      end
+    end
+
+    expected_methods = [
+      test_module.instance_method(:bingo),
+      parent_class.instance_method(:bango),
+      test_class.instance_method(:bongo),
+      test_class.instance_method(:bish),
+      self.class.instance_method(__method__)
+    ].sort_by(&:hash)
+    actual_methods = @sn.all_methods_with_source(string: 'dworkin_barimen',
+                                                 match_case: true).sort_by(&:hash)
+    assert_equal expected_methods, actual_methods
+    assert_equal expected_methods,
+                 @sn.all_methods_with_source(string: 'DWORKIN_BARIMEN', match_case: false).
+                   sort_by(&:hash)
+  end
 end
