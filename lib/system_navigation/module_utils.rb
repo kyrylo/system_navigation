@@ -202,6 +202,12 @@ class SystemNavigation
           method.rb_method?
         end
       end
+
+      def which_selectors_send(message)
+        self.all_methods(only_own: true).select do |method|
+          method.sends_message?(message)
+        end
+      end
     end
   end
 end

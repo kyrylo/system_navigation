@@ -49,6 +49,18 @@ class SystemNavigation
         end
       end
 
+      def self.msg_send_scan(_for:, with:)
+        self.with_iseq(_for: _for, with: with) do |iseqs, instruction, idx|
+          next(instruction) if instruction.sends_msg?(_for)
+
+          prev_instruction = iseqs[idx.pred]
+
+          next unless performs_an_eval?(_for, instruction, prev_instruction)
+
+          msg_send_scan(_for: _for, with: iseq_from_eval(prev_instruction, with.unbound_method)).any?
+        end
+      end
+
       private
 
       def self.performs_an_eval?(_for, instruction, prev_instruction)

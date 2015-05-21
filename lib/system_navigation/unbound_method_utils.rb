@@ -1,6 +1,12 @@
 class SystemNavigation
   module UnboundMethodUtils
     refine UnboundMethod do
+      def with_scanner
+        scanner = InstructionStream.on(self)
+        scanner.decode
+        yield scanner
+      end
+
       def reads_field?(ivar)
         self.with_scanner do |s|
           s.scan_for(self.decoder_class.ivar_read_scan(_for: ivar, with: s))
@@ -21,12 +27,6 @@ class SystemNavigation
 
       def decoder_class
         InstructionStream::Decoder
-      end
-
-      def with_scanner
-        scanner = InstructionStream.on(self)
-        scanner.decode
-        yield scanner
       end
 
       def source_contains?(string, match_case)
@@ -53,6 +53,12 @@ class SystemNavigation
 
       def rb_method?
         !self.c_method?
+      end
+
+      def sends_message?(message)
+        self.with_scanner do |s|
+          s.scan_for(self.decoder_class.msg_send_scan(_for: message, with: s))
+        end
       end
     end
   end

@@ -108,6 +108,12 @@ class SystemNavigation
     self.all_behaviors.flat_map { |klass| klass.rb_methods }
   end
 
+  def all_senders(of:)
+    self.all_behaviors.flat_map do |klass|
+      klass.which_selectors_send(of)
+    end
+  end
+
   protected
 
   def all_references_to(literal)

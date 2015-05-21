@@ -64,6 +64,10 @@ class SystemNavigation
         setinstancevariable? && @unparsed =~ /\A:#{ivar},/
       end
 
+      def sends_msg?(message)
+        (opt_send_without_block? || send?) && @unparsed =~ /\A<callinfo!mid:#{message}/
+      end
+
       private
 
       def getinstancevariable?
@@ -88,6 +92,10 @@ class SystemNavigation
 
       def duparray?
         @instruction == 'duparray'
+      end
+
+      def send?
+        @instruction == 'send'
       end
 
       def parse_pos
