@@ -113,11 +113,11 @@ class SystemNavigation
 
       def belongs_to?(gem_name)
         gemspecs = Gem::Specification.find_all_by_name(gem_name)
-        return if gemspecs.none? || gemspecs.count != 1
-        return if self.all_methods.none?
+        return false if gemspecs.none? || gemspecs.count != 1
+        return false if self.all_methods.none?
 
         gemspec = gemspecs.first
-        pattern = %|/gems/#{gem_name}-#{gemspec.version}|
+        pattern = %r{(?:/gems/#{gem_name}-#{gemspec.version}/)|(?:/lib/ruby/[[0-9]\.]+/#{gem_name}/)}
         match_location = proc { |locations|
           !!locations.max_by { |_k, value| value }[0].match(pattern)
         }
