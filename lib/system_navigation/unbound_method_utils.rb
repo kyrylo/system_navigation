@@ -52,7 +52,7 @@ class SystemNavigation
       end
 
       def rb_method?
-        !c_method?
+        !self.c_method?
       end
     end
   end
