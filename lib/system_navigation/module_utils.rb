@@ -110,6 +110,55 @@ class SystemNavigation
       def includes_selector?(selector)
         self.all_method_selectors.include?(selector)
       end
+
+      def belongs_to?(gem_name)
+        gemspecs = Gem::Specification.find_all_by_name(gem_name)
+        return unless gemspecs.any? || gemspecs.count != 1
+        return if self.all_methods.none?
+
+        gemspec = gemspecs.first
+        pattern = %|/gems/#{gem_name}-#{gemspec.version}|
+        match_location = proc { |locations|
+          !!locations.max_by { |_k, value| value }[0].match(pattern)
+        }
+
+        if self.contains_only_rb_methods?
+          if self.all_neighbour_methods?
+            !!self.all_methods.first.source_location.first.match(pattern)
+          else
+            grouped_locations = self.group_locations_by_path
+
+            if grouped_locations.all? { |l| l[0].match(pattern) }
+              return true
+            else
+              match_location.call(grouped_locations)
+            end
+          end
+        else
+          grouped_locations = grouped_locations = self.group_locations_by_path
+          grouped_locations.delete_if { |k, v| k.nil? }
+
+          if grouped_locations.empty?
+            false
+          else
+            match_location.call(grouped_locations)
+          end
+        end
+      end
+
+      def contains_only_rb_methods?
+        self.all_methods.all? { |meth| meth.source_location }
+      end
+
+      def all_neighbour_methods?
+        self.all_methods.map { |meth| meth.source_location[0] }.uniq.count == 1
+      end
+
+      def group_locations_by_path
+        grouped = self.all_methods.map { |m| m.source_location && m.source_location.first || nil }.
+                  group_by(&:itself).map{ |k,v| [k, v.count] }
+        Hash[grouped]
+      end
     end
   end
 end
