@@ -89,7 +89,7 @@ class SystemNavigation
         who
       end
 
-      def which_local_selectors_refer_to(literal)
+      def which_global_selectors_refer_to(literal)
         who = []
 
         self.selectors_and_methods(false) do |selector, method|
