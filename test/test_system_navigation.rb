@@ -368,6 +368,32 @@ class TestSystemNavigation < Minitest::Test
     end
 
     assert_equal [test_module, test_class].sort_by(&:hash),
-                 @sn.all_implementors_of(:bongo_bongo)
+                 @sn.all_implementors_of(:bongo_bongo).sort_by(&:hash)
+  end
+
+  def test_all_local_calls
+    test_module = Module.new do
+      def bango; :bingo; end
+    end
+
+    parent_class = Class.new do
+      def foo
+        :bingo
+      end
+    end
+
+    test_class = Class.new(parent_class) do
+      def self.bingo; :bingo; end
+      include test_module
+      def bongo; :bongo; end
+    end
+
+    expected_methods = [
+      test_class.instance_method(:bango),
+      parent_class.instance_method(:foo),
+      test_class.singleton_class.instance_method(:bingo)
+    ].sort_by(&:hash)
+    assert_equal expected_methods,
+                 @sn.all_local_calls(on: :bingo, of_class: test_class).sort_by(&:hash)
   end
 end
