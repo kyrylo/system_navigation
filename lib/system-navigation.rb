@@ -79,7 +79,7 @@ class SystemNavigation
     references = []
 
     select_methods = proc { |klass|
-      selectors = klass.which_selectors_refer_to(on)
+      selectors = klass.which_local_selectors_refer_to(on)
       selectors.map { |sel| klass.instance_method(sel) }
     }
 

@@ -89,22 +89,43 @@ class SystemNavigation
         who
       end
 
-      def selectors_and_methods(&block)
-        self.method_hash.each_pair do |selector, method|
+      def which_local_selectors_refer_to(literal)
+        who = []
+
+        self.selectors_and_methods(false) do |selector, method|
+          if method.has_literal?(literal)
+            who << selector
+          end
+        end
+
+        who
+      end
+
+      def selectors_and_methods(only_own_methods = true, &block)
+        self.method_hash(only_own_methods).each_pair do |selector, method|
           block.call(selector, method)
         end
       end
 
-      def method_hash
-        Hash[self.all_methods.map { |method| [method.original_name, method] }]
+      def method_hash(only_own_methods = true)
+        Hash[self.all_methods(only_own_methods).map do |method|
+               [method.original_name, method]
+             end]
       end
 
       def all_method_selectors
         self.instance_methods(false) + self.private_instance_methods(false)
       end
 
-      def all_methods
-        selectors.map { |selector| self.instance_method(selector) }
+      def all_methods(only_own_methods = true)
+        selectors.map do |selector|
+          method = self.instance_method(selector)
+          if only_own_methods
+            method if self.own_method?(method)
+          else
+            method
+          end
+        end.compact
       end
 
       def includes_selector?(selector)
@@ -162,8 +183,12 @@ class SystemNavigation
 
       def select_matching_methods(string, match_case)
         self.all_methods.select do |method|
-          method.owner == self && method.source_contains?(string, match_case)
+          self.own_method?(method) && method.source_contains?(string, match_case)
         end
+      end
+
+      def own_method?(method)
+        method.owner == self
       end
     end
   end
