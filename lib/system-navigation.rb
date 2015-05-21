@@ -100,6 +100,14 @@ class SystemNavigation
     end
   end
 
+  def all_c_methods
+    self.all_behaviors.flat_map { |klass| klass.c_methods }
+  end
+
+  def all_rb_methods
+    self.all_behaviors.flat_map { |klass| klass.rb_methods }
+  end
+
   protected
 
   def all_references_to(literal)

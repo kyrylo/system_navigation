@@ -92,7 +92,7 @@ class SystemNavigation
       def which_global_selectors_refer_to(literal)
         who = []
 
-        self.selectors_and_methods(false) do |selector, method|
+        self.selectors_and_methods(only_own: false) do |selector, method|
           if method.has_literal?(literal)
             who << selector
           end
@@ -101,14 +101,14 @@ class SystemNavigation
         who
       end
 
-      def selectors_and_methods(only_own_methods = true, &block)
-        self.method_hash(only_own_methods).each_pair do |selector, method|
+      def selectors_and_methods(only_own: true, &block)
+        self.method_hash(only_own: only_own).each_pair do |selector, method|
           block.call(selector, method)
         end
       end
 
-      def method_hash(only_own_methods = true)
-        Hash[self.all_methods(only_own_methods).map do |method|
+      def method_hash(only_own: true)
+        Hash[self.all_methods(only_own: only_own).map do |method|
                [method.original_name, method]
              end]
       end
@@ -117,10 +117,10 @@ class SystemNavigation
         self.instance_methods(false) + self.private_instance_methods(false)
       end
 
-      def all_methods(only_own_methods = true)
+      def all_methods(only_own: true)
         selectors.map do |selector|
           method = self.instance_method(selector)
-          if only_own_methods
+          if only_own
             method if self.own_method?(method)
           else
             method
@@ -189,6 +189,18 @@ class SystemNavigation
 
       def own_method?(method)
         method.owner == self
+      end
+
+      def c_methods
+        self.all_methods(only_own: true).select do |method|
+          method.c_method?
+        end
+      end
+
+      def rb_methods
+        self.all_methods(only_own: true).select do |method|
+          method.rb_method?
+        end
       end
     end
   end

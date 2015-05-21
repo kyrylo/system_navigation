@@ -46,6 +46,14 @@ class SystemNavigation
         code_and_comment.downcase! && string.downcase! unless match_case
         !!code_and_comment.match(string)
       end
+
+      def c_method?
+        self.source_location.nil?
+      end
+
+      def rb_method?
+        !c_method?
+      end
     end
   end
 end
