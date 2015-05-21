@@ -57,5 +57,19 @@ class SystemNavigation
         enum
       end
     end
+
+    def all_objects
+      enum = Enumerator.new do |y|
+        ObjectSpace.each_object do |klass|
+          y.yield klass
+        end
+      end
+
+      if block_given?
+        enum.each(&block)
+      else
+        enum
+      end
+    end
   end
 end

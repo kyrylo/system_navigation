@@ -22,7 +22,7 @@ class SystemNavigation
   extend Forwardable
   def_delegators :@environment,
                  :all_behaviors, :all_classes, :all_classes_and_modules,
-                 :all_modules
+                 :all_modules, :all_objects
 
   def self.default
     self.new
