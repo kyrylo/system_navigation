@@ -90,6 +90,10 @@ class SystemNavigation
     references.flatten
   end
 
+  def all_methods
+    self.all_behaviors.flat_map { |klass| klass.all_methods }
+  end
+
   protected
 
   def all_references_to(literal)
