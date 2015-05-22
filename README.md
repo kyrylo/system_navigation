@@ -114,10 +114,9 @@ If called without the `block`, returns an Enumerator that iterates over all
 classes and modules. Given the block it enumerates with `#each`.
 
 ```ruby
-sn.all_objects.group_by(&:class)
-#=> [Complex, Rational, Time, File::Stat, Bignum, ..., String]
-sn.all_classes_and_modules.modules { |mod| ... }
-
+sn.all_objects.group_by(&:class)[Symbol].count #=> 5463
+sn.all_objects { |obj| ... }
+```
 
 Limitations
 -----------
