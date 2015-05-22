@@ -121,7 +121,7 @@ sn.all_objects { |obj| ... }
 Limitations
 -----------
 
-Supports **only** CRuby.
+Supports *only* CRuby.
 
 * CRuby 2.2.2 and higher
 
