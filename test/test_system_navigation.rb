@@ -524,7 +524,7 @@ class TestSystemNavigation < Minitest::Test
       end
 
       def bongo
-        @cool_object.twerkin_barimen
+        @cool_object.girls_love_me
       end
 
       def bish
