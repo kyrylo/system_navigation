@@ -70,6 +70,18 @@ class SystemNavigation
     end
   end
 
+  def all_classes_in_gem_named(gem_name)
+    self.all_classes.select do |klass|
+      klass.belongs_to?(gem_name)
+    end
+  end
+
+  def all_modules_in_gem_named(gem_name)
+    self.all_modules.select do |klass|
+      klass.belongs_to?(gem_name)
+    end
+  end
+
   def all_classes_and_modules_in_gem_named(gem_name)
     self.all_classes_and_modules.select do |klass|
       klass.belongs_to?(gem_name)
