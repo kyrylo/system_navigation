@@ -114,6 +114,12 @@ class SystemNavigation
     end
   end
 
+  def all_sent_messages
+    self.all_behaviors.flat_map do |klass|
+      klass.all_messages
+    end.uniq
+  end
+
   protected
 
   def all_references_to(literal)

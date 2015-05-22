@@ -65,7 +65,12 @@ class SystemNavigation
       end
 
       def sends_msg?(message)
-        (opt_send_without_block? || send?) && @unparsed =~ /\A<callinfo!mid:#{message}/
+        sending? && @unparsed =~ /\A<callinfo!mid:#{message}/
+      end
+
+      def find_message
+        return unless sending?
+        @unparsed.match(/<callinfo!mid:(.+), argc:[0-9]+, .+>/)[1]
       end
 
       private
@@ -96,6 +101,10 @@ class SystemNavigation
 
       def send?
         @instruction == 'send'
+      end
+
+      def sending?
+        opt_send_without_block? || send?
       end
 
       def parse_pos

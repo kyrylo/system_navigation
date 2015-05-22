@@ -49,7 +49,7 @@ class SystemNavigation
       # Answer a set of selectors whose methods access the argument, ivar, as a
       # named instance variable.
       def which_selectors_access(ivar)
-        selectors.select do |sel|
+        self.selectors.select do |sel|
           meth = self.instance_method(sel)
           meth.reads_field?(ivar) || meth.writes_field?(ivar)
         end
@@ -206,6 +206,12 @@ class SystemNavigation
       def which_selectors_send(message)
         self.all_methods(only_own: true).select do |method|
           method.sends_message?(message)
+        end
+      end
+
+      def all_messages
+        self.all_method_selectors.select do |selector|
+          self.instance_method(selector).sent_messages.uniq
         end
       end
     end

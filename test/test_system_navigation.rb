@@ -177,7 +177,7 @@ class TestSystemNavigation < Minitest::Test
     assert_equal expected_methods, access(:@ivar, test_class.singleton_class)
   end
 
-  def test_all_calls_on
+  def test_all_calls
     test_class = Class.new do
       def drum
         :drum_n_bass_yo
@@ -453,7 +453,7 @@ class TestSystemNavigation < Minitest::Test
       end
     end
 
-    cool_class = Class.new do
+    _cool_class = Class.new do
       def twerkin_barimen
         :oh_yeah
       end

@@ -1,7 +1,7 @@
 class SystemNavigation
   class InstructionStream
     class Decoder
-      def self.with_iseq(_for:, with:, &block)
+      def self.with_iseq(_for: nil, with:, &block)
         iseqs = with.iseqs(_for)
 
         iseqs.select.with_index do |instruction, idx|
@@ -59,6 +59,12 @@ class SystemNavigation
 
           msg_send_scan(_for: _for, with: iseq_from_eval(prev_instruction, with.unbound_method)).any?
         end
+      end
+
+      def self.scan_for_sent_messages(with:)
+        with.iseqs(nil).map do |instruction|
+          instruction.find_message
+        end.compact
       end
 
       private

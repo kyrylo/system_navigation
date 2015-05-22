@@ -60,6 +60,12 @@ class SystemNavigation
           s.scan_for(self.decoder_class.msg_send_scan(_for: message, with: s))
         end
       end
+
+      def sent_messages
+        self.with_scanner do |s|
+          self.decoder_class.scan_for_sent_messages(with: s)
+        end
+      end
     end
   end
 end
