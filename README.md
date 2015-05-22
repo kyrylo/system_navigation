@@ -66,6 +66,8 @@ sn.all_accesses(to: :foo) #=> [#<UnboundMethod: ...>, ..., #<UnboundMethod: ...>
 Limitations
 -----------
 
+Supports **only** CRuby.
+
 * CRuby 2.2.2 and higher
 
 License
