@@ -29,10 +29,12 @@ require 'system-navigation'
 sn = SystemNavigation.default
 ```
 
+The term `method` implies an instance of the `UnboundMethod` class.
+
 #### all_accesses(to:, from:)
 
-Returns an array of UnboundMethod objects of all methods of a class `from` or its
-sub/superclass that refer to the instance variable `to`.
+Returns an Array of all methods of the class `from` or its sub/superclasses that
+refer to the instance variable `to`.
 
 ```ruby
 class A
@@ -42,6 +44,23 @@ class A
 end
 
 sn.all_accesses(to: :@foo, from: A) #=> [#<UnboundMethod: A#initialize>]
+```
+
+#### all_calls(on:, from: nil)
+
+Returns an Array of all methods of the class `from` or its subclasses that call
+the `on` Symbol. If the `from` parameter is omitted, returns an Array of all
+methods that call `on`.
+
+```ruby
+class A
+  def initialize
+    :foo
+  end
+end
+
+sn.all_accesses(to: :foo, from: A) #=> [#<UnboundMethod: A#initialize>]
+sn.all_accesses(to: :foo) #=> [#<UnboundMethod: ...>, ..., #<UnboundMethod: ...>]
 ```
 
 Limitations
