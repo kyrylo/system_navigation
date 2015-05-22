@@ -120,6 +120,14 @@ class SystemNavigation
     end.uniq
   end
 
+  def all_stores(into:, from:)
+    from.with_all_sub_and_superclasses.flat_map do |klass|
+      klass.which_selectors_store_into(into).map do |sel|
+        klass.instance_method(sel)
+      end
+    end
+  end
+
   protected
 
   def all_references_to(literal)

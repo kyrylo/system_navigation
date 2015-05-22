@@ -214,6 +214,13 @@ class SystemNavigation
           self.instance_method(selector).sent_messages.uniq
         end
       end
+
+      def which_selectors_store_into(ivar)
+        self.selectors.select do |sel|
+          meth = self.instance_method(sel)
+          meth.writes_field?(ivar)
+        end
+      end
     end
   end
 end
