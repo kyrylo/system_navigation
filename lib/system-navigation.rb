@@ -1,5 +1,6 @@
 require 'English'
 require 'forwardable'
+require 'method_source'
 
 require_relative 'system_navigation/array_utils'
 require_relative 'system_navigation/unbound_method_utils'
