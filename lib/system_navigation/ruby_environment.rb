@@ -44,7 +44,7 @@ class SystemNavigation
       end
     end
 
-    def all_modules
+    def all_modules(&block)
       enum = Enumerator.new do |y|
         self.all_classes_and_modules.each do |klass|
           y.yield(klass) if klass.instance_of?(Module)
@@ -58,7 +58,7 @@ class SystemNavigation
       end
     end
 
-    def all_objects
+    def all_objects(&block)
       enum = Enumerator.new do |y|
         ObjectSpace.each_object do |klass|
           y.yield klass

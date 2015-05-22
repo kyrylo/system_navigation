@@ -46,6 +46,19 @@ end
 sn.all_accesses(to: :@foo, from: A) #=> [#<UnboundMethod: A#initialize>]
 ```
 
+#### all_behaviors(&block)
+
+If called without the `block`, returns an Enumerator that iterates over all
+classes and their eigenclasses, modules and their eigenclasses. Given the block
+it enumerates with `#each`.
+
+```ruby
+sn.all_behaviors.select { |behavior| behavior.kind_of?(Enumerable) }
+#=> [Etc::Group, Etc::Passwd, Gem::Specification]
+
+sn.all_behaviors { |behavior| ... }
+```
+
 #### all_calls(on:, from: nil)
 
 Returns an Array of all methods of the class `from` or its subclasses that call
@@ -62,6 +75,49 @@ end
 sn.all_accesses(to: :foo, from: A) #=> [#<UnboundMethod: A#initialize>]
 sn.all_accesses(to: :foo) #=> [#<UnboundMethod: ...>, ..., #<UnboundMethod: ...>]
 ```
+
+#### all_classes(&block)
+
+If called without the `block`, returns an Enumerator that iterates over all
+classes. Given the block it enumerates with `#each`.
+
+```ruby
+sn.all_classes.select { |klass| klass.superclass == BasicObject } #=> [Object]
+sn.all_classes { |klass| ... }
+```
+
+#### all_modules(&block)
+
+If called without the `block`, returns an Enumerator that iterates over all
+modules. Given the block it enumerates with `#each`.
+
+```ruby
+sn.all_modules.select { |mod| mod.include?(FileUtils) }
+#=> [FileUtils::NoWrite, FileUtils::Verbose, FileUtils::DryRun]
+sn.all_modules { |mod| ... }
+```
+
+#### all_classes_and_modules(&block)
+
+If called without the `block`, returns an Enumerator that iterates over all
+classes and modules. Given the block it enumerates with `#each`.
+
+```ruby
+sn.all_classes_and_modules.select { |mod| mod.include?(Comparable) }
+#=> [Complex, Rational, Time, File::Stat, Bignum, ..., String]
+sn.all_classes_and_modules.modules { |mod| ... }
+```
+
+#### all_objects(&block)
+
+If called without the `block`, returns an Enumerator that iterates over all
+classes and modules. Given the block it enumerates with `#each`.
+
+```ruby
+sn.all_objects.group_by(&:class)
+#=> [Complex, Rational, Time, File::Stat, Bignum, ..., String]
+sn.all_classes_and_modules.modules { |mod| ... }
+
 
 Limitations
 -----------
