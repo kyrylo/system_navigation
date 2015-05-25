@@ -49,11 +49,9 @@ class SystemNavigation
     end
 
     def all_belong_to_gem?(pattern:)
-      self.instance_and_singleton_do(
-        for_all: proc { |_scope, _selectors, method|
-          !!method.source_location.first.match(pattern)
-        }
-      )
+      @collection.as_array.all? do |method|
+        method.source_location.first.match(pattern)
+      end
     end
 
     def group_by_path

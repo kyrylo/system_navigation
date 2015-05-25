@@ -122,9 +122,8 @@ class SystemNavigation
             grouped_locations = self.group_locations_by_path
 
             if grouped_locations.all? { |l| l[0].match(pattern) }
-              return true
+              true
             else
-                            binding.pry if               match_location.call(grouped_locations)
               match_location.call(grouped_locations)
             end
           end
