@@ -20,7 +20,7 @@ class TestSystemNavigation < Minitest::Test
       end
 
       def bish
-        @cool_object += 1g
+        @cool_object += 1
       end
     end
 
