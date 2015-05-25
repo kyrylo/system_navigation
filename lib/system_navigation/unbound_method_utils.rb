@@ -9,12 +9,6 @@ class SystemNavigation
         !self.c_method?
       end
 
-      def sends_message?(message)
-        self.scan_for do |s|
-          self.decoder.msg_send_scan(_for: message, with: s)
-        end
-      end
-
       def sent_messages
         self.scan_for do |s|
           self.decoder.scan_for_sent_messages(with: s)

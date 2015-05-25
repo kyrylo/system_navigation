@@ -60,6 +60,12 @@ class SystemNavigation
       !!code_and_comment.match(string)
     end
 
+    def sends_message?(message)
+      self.scan_for do |s|
+        @decoder.msg_send_scan(_for: message, with: s)
+      end
+    end
+
     protected
 
     def scan_for

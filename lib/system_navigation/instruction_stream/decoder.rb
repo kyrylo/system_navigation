@@ -49,7 +49,7 @@ class SystemNavigation
         end
       end
 
-      def self.msg_send_scan(_for:, with:)
+      def msg_send_scan(_for:, with:)
         self.with_iseq(_for: _for, with: with) do |iseqs, instruction, idx|
           next(instruction) if instruction.sends_msg?(_for)
 

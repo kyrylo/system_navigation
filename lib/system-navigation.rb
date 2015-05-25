@@ -104,9 +104,7 @@ class SystemNavigation
   end
 
   def all_senders(of:)
-    self.all_behaviors.flat_map do |klass|
-      klass.which_selectors_send(of)
-    end
+    self.all_classes_and_modules.flat_map { |klass| klass.select_senders_of(of) }
   end
 
   def all_sent_messages

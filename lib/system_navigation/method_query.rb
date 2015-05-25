@@ -80,6 +80,15 @@ class SystemNavigation
       end
     end
 
+    def select_senders_of(message:)
+      @collection.as_array.select do |method|
+        compiled_method = CompiledMethod.compile(method)
+        if compiled_method.sends_message?(message)
+          compiled_method.unwrap
+        end
+      end
+    end
+
     protected
 
     def instance_and_singleton_do(for_instance: nil, for_singleton: nil, for_all: nil)

@@ -132,7 +132,7 @@ class SystemNavigation
       end
 
       def sends_msg?(message)
-        !!(sending? && @op_id == message)
+        !!(sending? && @op_id == message.to_s)
       end
 
       def operand

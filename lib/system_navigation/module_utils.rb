@@ -185,10 +185,11 @@ class SystemNavigation
         end
       end
 
-      def which_selectors_send(message)
-        self.own_methods.select do |method|
-          method.sends_message?(message)
-        end
+      def select_senders_of(message)
+        MethodQuery.execute(
+          collection: self.own_methods,
+          query: :select_senders_of,
+          message: message)
       end
 
       def all_messages
