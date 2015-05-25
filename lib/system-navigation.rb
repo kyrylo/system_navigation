@@ -1,6 +1,5 @@
 require 'method_source'
 
-require 'English'
 require 'forwardable'
 require 'strscan'
 
