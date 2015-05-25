@@ -1,8 +1,6 @@
 class SystemNavigation
   class InstructionStream
     class Instruction
-      INSTR_POS_PATTERN = /\A[0-9]+\s/
-
       def self.parse(str)
         self.new(str).parse
       end
