@@ -1,6 +1,10 @@
 require_relative 'helper'
 
 class TestSystemNavigationAllClassesImplementing < Minitest::Test
+  def setup
+    @sn = SystemNavigation.default
+  end
+
   def test_all_classes_implementing
     test_class = Class.new do
       def bango_bango; end

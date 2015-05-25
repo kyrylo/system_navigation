@@ -223,6 +223,10 @@ class SystemNavigation
             behavior: self)
         end
       end
+
+      def includes_selector?(selector)
+        self.own_selectors.as_array.include?(selector)
+      end
     end
   end
 end
