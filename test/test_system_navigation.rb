@@ -5,10 +5,6 @@ class TestSystemNavigation < Minitest::Test
     def access(ivar, klass)
       @sn.all_accesses(to: ivar, from: klass).sort_by(&:hash)
     end
-
-    def calls_on(sym)
-      @sn.all_calls(on: sym).sort_by(&:hash)
-    end
   end
 
   include Helper

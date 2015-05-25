@@ -1,12 +1,17 @@
+require 'method_source'
+
 require 'English'
 require 'forwardable'
-require 'method_source'
+require 'strscan'
 
 require_relative 'system_navigation/array_utils'
 require_relative 'system_navigation/unbound_method_utils'
 require_relative 'system_navigation/module_utils'
 require_relative 'system_navigation/ruby_environment'
 require_relative 'system_navigation/instruction_stream'
+require_relative 'system_navigation/method_query'
+require_relative 'system_navigation/compiled_method'
+require_relative 'system_navigation/method_hash'
 require_relative 'system_navigation/instruction_stream/decoder'
 require_relative 'system_navigation/instruction_stream/instruction'
 require_relative 'system_navigation/instruction_stream/instruction/attr_instruction'
@@ -35,21 +40,24 @@ class SystemNavigation
 
   def all_accesses(to:, from:)
     from.with_all_sub_and_superclasses.flat_map do |klass|
-      klass.which_selectors_access(to).map do |sel|
-        klass.instance_method(sel)
-      end
+      klass.which_selectors_access(to).map { |sel| klass.instance_method(sel) }
     end
   end
 
-  def all_calls(on:, from: nil)
-    if from
-      from.with_all_subclasses_do.flat_map do |klass|
-        selectors = klass.which_selectors_refer_to(on)
-        selectors.map { |sel| klass.instance_method(sel) }
-      end
-    else
-      self.all_references_to(on)
+  def all_calls(on:, from: nil, gem: nil)
+    if from && gem
+      fail ArgumentError, 'both from and gem were provided'
     end
+
+    subject = if from
+                from.with_all_subclasses
+              elsif gem
+                self.all_behaviors_in_gem_named(gem)
+              else
+                self.all_behaviors
+              end
+
+    subject.flat_map { |behavior| behavior.select_methods_that_refer_to(on) }
   end
 
   def all_classes_implementing(selector)
@@ -57,6 +65,22 @@ class SystemNavigation
       klass.includes_selector?(selector)
     end
   end
+
+  def all_local_calls(on:, of_class:)
+    references = []
+
+    select_methods = proc { |klass|
+      selectors = klass.which_global_selectors_refer_to(on)
+      selectors.map { |sel| klass.instance_method(sel) }
+    }
+
+    references << of_class.with_all_sub_and_superclasses.
+                 flat_map(&select_methods)
+    references << of_class.singleton_class.with_all_sub_and_superclasses.
+                 flat_map(&select_methods)
+    references.flatten
+  end
+
 
   def all_modules_implementing(selector)
     self.all_modules.select do |mod|
@@ -82,25 +106,10 @@ class SystemNavigation
     end
   end
 
-  def all_classes_and_modules_in_gem_named(gem_name)
+  def all_behaviors_in_gem_named(gem_name)
     self.all_classes_and_modules.select do |klass|
       klass.belongs_to?(gem_name)
     end
-  end
-
-  def all_local_calls(on:, of_class:)
-    references = []
-
-    select_methods = proc { |klass|
-      selectors = klass.which_global_selectors_refer_to(on)
-      selectors.map { |sel| klass.instance_method(sel) }
-    }
-
-    references << of_class.with_all_sub_and_superclasses.
-                 flat_map(&select_methods)
-    references << of_class.singleton_class.with_all_sub_and_superclasses.
-                 flat_map(&select_methods)
-    references.flatten
   end
 
   def all_methods
@@ -138,15 +147,6 @@ class SystemNavigation
       klass.which_selectors_store_into(into).map do |sel|
         klass.instance_method(sel)
       end
-    end
-  end
-
-  protected
-
-  def all_references_to(literal)
-    self.all_behaviors.flat_map do |klass|
-      selectors = klass.which_selectors_refer_to(literal)
-      selectors.map { |sel| klass.instance_method(sel) }
     end
   end
 end

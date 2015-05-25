@@ -59,42 +59,39 @@ sn.all_behaviors.select { |behavior| behavior.kind_of?(Enumerable) }
 sn.all_behaviors { |behavior| ... }
 ```
 
-#### all_calls(on:, from: nil)
+#### all_calls(on:, from: nil, gem: nil)
 
-Returns an Array of all methods of the class `from` or its subclasses that call
-the `on` Symbol. If the `from` parameter is omitted, returns an Array of all
-methods that call `on`.
+Returns an Array of all methods of the behavior `from` and its
+sub/superclasses/ancestors that call the `on` literal. Accepts either `from` or
+`gem` arguments, but not both. If both of these arguments are omitted, returns
+an Array of all methods that call `on` globally.
+
+Literal is
 
 ```ruby
 class A
-  def initialize
+  def bing
     :foo
   end
 end
 
-sn.all_accesses(to: :foo, from: A) #=> [#<UnboundMethod: A#initialize>]
-sn.all_accesses(to: :foo) #=> [#<UnboundMethod: ...>, ..., #<UnboundMethod: ...>]
-```
+class B < A
+  def bang
+    :foo
+  end
+end
 
-#### all_classes(&block)
+sn.all_calls(on: :foo, from: A)
+#=> [#<UnboundMethod: A#bing>, #<UnboundMethod: B#bong>]
 
-If called without the `block`, returns an Enumerator that iterates over all
-classes. Given the block it enumerates with `#each`.
+sn.all_calls(on: :foo, gem: 'minitest')
+#=> [...]
 
-```ruby
-sn.all_classes.select { |klass| klass.superclass == BasicObject } #=> [Object]
-sn.all_classes { |klass| ... }
-```
+sn.all_calls(on: :foo)
+#=> [..., ..., ...]
 
-#### all_modules(&block)
-
-If called without the `block`, returns an Enumerator that iterates over all
-modules. Given the block it enumerates with `#each`.
-
-```ruby
-sn.all_modules.select { |mod| mod.include?(FileUtils) }
-#=> [FileUtils::NoWrite, FileUtils::Verbose, FileUtils::DryRun]
-sn.all_modules { |mod| ... }
+sn.all_calls(on: :foo, from: A, gem: 'minitest')
+#=> ArgumentError
 ```
 
 #### all_classes_and_modules(&block)
@@ -116,6 +113,63 @@ classes and modules. Given the block it enumerates with `#each`.
 ```ruby
 sn.all_objects.group_by(&:class)[Symbol].count #=> 5463
 sn.all_objects { |obj| ... }
+```
+
+#### all_classes_implementing(selector)
+
+Returns an Array of all classes that implement the `selector`, which is a Symbol,
+representing a method name.
+
+```ruby
+sn.all_classes_implementing(:last) #=> [Range, Array]
+```
+
+#### all_modules_implementing(selector)
+
+Returns an Array of all modules that implement the `selector`, which is a Symbol,
+representing a method name.
+
+```ruby
+sn.all_modules_implementing(:first) #=> [Enumerable]
+```
+
+#### all_implementors_of(selector)
+
+```ruby
+sn.all_implementors_of(:first) #=> [Range, Array, Enumerable]
+```
+
+#### all_classes_in_gem_named(gem_name)
+
+Returns an Array of all classes in a RubyGem `gem_name`.
+
+```ruby
+sn.all_classes_in_gem_named('pry')
+#=> [Pry::Editor, Pry::PluginManager::Plugin, ..., Pry::PluginManager::NoPlugin]
+```
+
+#### all_modules_in_gem_named(gem_name)
+
+Returns an Array of all modules in a RubyGem `gem_name`.
+
+```ruby
+sn.all_modules_in_gem_named('pry')
+#=> [Pry::RbxPath, Pry::Command::Ls::MethodsHelper, ..., Pry::Command::Ls::JRubyHacks]
+```
+
+#### all_classes_and_modules_in_gem_named(gem_name)
+
+Returns an Array of all classes and modules in a RubyGem `gem_name`.
+
+```ruby
+sn.all_classes_and_modules_in_gem_named('pry')
+#=> [Pry::Editor, Pry::Command::JumpTo, ..., Pry::Command::BangPry]
+```
+
+#### all_local_calls(on:, from:)
+
+```ruby
+sn.all_local_calls(on: :foo, from: A) #=> [#<UnboundMethod: A#initialize>]
 ```
 
 Limitations

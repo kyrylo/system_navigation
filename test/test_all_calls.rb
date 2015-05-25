@@ -1,11 +1,17 @@
 require_relative 'helper'
 
-class TestSystemNavigationAllCallsOn < Minitest::Test
+class TestSystemNavigationAllCalls < Minitest::Test
   def setup
     @sn = SystemNavigation.default
   end
 
-  def test_all_calls
+  def test_all_calls_bad_arguments
+    assert_raises(ArgumentError) do
+      @sn.all_calls(on: :foo, gem: 'bar', from: Class.new)
+    end
+  end
+
+  def test_all_calls_global
     test_class = Class.new do
       def drum; :drum_n_bass_yo; end
       def none; @none; end
@@ -30,7 +36,7 @@ class TestSystemNavigationAllCallsOn < Minitest::Test
     assert_equal expected_methods, @sn.all_calls(on: :drum_n_bass_yo)
   end
 
-  def test_all_calls_on_accessors
+  def test_all_calls_accessors
     test_class = Class.new do
       attr_accessor :comrade_joseph_koba_stalin
       def fluffy; :fluffy; end
@@ -59,7 +65,7 @@ class TestSystemNavigationAllCallsOn < Minitest::Test
     assert_equal expected_methods, @sn.all_calls(on: :comrade_joseph_koba_stalin=)
   end
 
-  def test_all_calls_on_simple_hash
+  def test_all_calls_simple_hash
     test_class = Class.new do
       def piggy; {comrade_vladimir_lenin_ulyanov: 1, oinky: 2}; end
     end
@@ -84,7 +90,7 @@ class TestSystemNavigationAllCallsOn < Minitest::Test
     assert_equal expected_methods, @sn.all_calls(on: :comrade_lavrentiy_pavlovich_beria)
   end
 
-  def test_all_calls_on_eval
+  def test_all_calls_eval
     test_class = Class.new do
       def eval; eval(':marshal_zhukov'); end
       def nested_eval; eval('eval(:marshal_zhukov)'); end
@@ -98,7 +104,7 @@ class TestSystemNavigationAllCallsOn < Minitest::Test
     assert_equal expected_methods, @sn.all_calls(on: :marshal_zhukov)
   end
 
-  def test_all_calls
+  def test_all_calls_local
     parent_class = Class.new do
       def bingo; :woohoo; end
     end
@@ -123,7 +129,7 @@ class TestSystemNavigationAllCallsOn < Minitest::Test
     assert_equal expected_methods, @sn.all_calls(on: :woohoo, from: test_class)
   end
 
-  def test_all_local_calls
+  def test_all_calls_gem
     test_module = Module.new do
       def bango; :bingo; end
     end
@@ -145,5 +151,12 @@ class TestSystemNavigationAllCallsOn < Minitest::Test
     ]
     assert_equal expected_methods,
                  @sn.all_local_calls(on: :bingo, of_class: test_class)
+  end
+
+  def test_all_calls_gem
+    expected = [ Minitest.singleton_method(:autorun),
+                 Minitest::Runnable.singleton_method(:on_signal),
+                 Minitest::Spec::DSL.instance_method(:spec_type) ]
+    assert_equal expected, @sn.all_calls(on: :call, gem: 'minitest')
   end
 end

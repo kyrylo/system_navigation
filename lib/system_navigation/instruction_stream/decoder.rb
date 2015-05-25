@@ -1,7 +1,7 @@
 class SystemNavigation
   class InstructionStream
     class Decoder
-      def self.with_iseq(_for: nil, with:, &block)
+      def with_iseq(_for: nil, with:, &block)
         iseqs = with.iseqs(_for)
 
         iseqs.select.with_index do |instruction, idx|
@@ -35,8 +35,8 @@ class SystemNavigation
         end
       end
 
-      def self.literal_scan(_for:, with:)
-        name = with.unbound_method.original_name
+      def literal_scan(_for:, with:)
+        name = with.method.original_name
 
         self.with_iseq(_for: name, with: with) do |iseqs, instruction, idx|
           next(instruction) if instruction.putobjects?(_for) || instruction.duparrays?(_for)
@@ -45,7 +45,7 @@ class SystemNavigation
 
           next unless performs_an_eval?(_for, instruction, prev_instruction)
 
-          literal_scan(_for: _for, with: iseq_from_eval(prev_instruction, with.unbound_method)).any?
+          literal_scan(_for: _for, with: iseq_from_eval(prev_instruction, with.method)).any?
         end
       end
 
@@ -57,7 +57,7 @@ class SystemNavigation
 
           next unless performs_an_eval?(_for, instruction, prev_instruction)
 
-          msg_send_scan(_for: _for, with: iseq_from_eval(prev_instruction, with.unbound_method)).any?
+          msg_send_scan(_for: _for, with: iseq_from_eval(prev_instruction, with.method)).any?
         end
       end
 
@@ -69,11 +69,11 @@ class SystemNavigation
 
       private
 
-      def self.performs_an_eval?(_for, instruction, prev_instruction)
-        prev_instruction.putstrings?(_for) && instruction.evals?
+      def performs_an_eval?(_for, instruction, prev_instruction)
+        instruction.evals? && prev_instruction.putstrings?(_for)
       end
 
-      def self.iseq_from_eval(instruction, method = nil)
+      def iseq_from_eval(instruction, method = nil)
         # Avoid segfault. See: https://bugs.ruby-lang.org/issues/11159
         uncompiled = instruction.evaling_str || nil.to_s
 

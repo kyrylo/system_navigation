@@ -8,122 +8,133 @@ class SystemNavigation
       end
 
       def initialize(str)
-        @instruction = ''
-        @pos = 0
+        @raw = StringScanner.new(str)
+        @pos = nil
+        @opcode = ''
+        @operand = nil
         @evaling_str = nil
-        @unparsed = str
-        @raw_instruction = str.dup
+        @lineno = nil
+        @op_id = nil
+        @service_instruction = false
       end
 
       def parse
-        unless service_instruction?
-          @pos = parse_pos
-          @instruction = parse_instruction
-        end
+        return if parse_service_instruction
+
+        parse_position
+        parse_opcode
+        parse_operand
+        parse_lineno
+        parse_op_id
 
         self
       end
 
+      def parse_service_instruction
+        if @raw.peek(2) == '==' || @raw.peek(6) !~ /[0-9]{4,6} /
+          @service_instruction = true
+        end
+      end
+
+      def parse_position
+        n = @raw.scan(/[0-9]{4,6}/)
+        @pos = n.to_i if n
+        @raw.skip(/\s*/)
+      end
+
+      def parse_opcode
+        @opcode = @raw.scan(/[a-zA-Z0-9_]+/)
+        @raw.skip(/\s*/)
+      end
+
+      def parse_operand
+        if @raw.check(/</)
+          @operand = @raw.scan(/<.+>/)
+        elsif @raw.check(/\[/)
+          @operand = @raw.scan(/\[.*\]/)
+        elsif @raw.check(/"/)
+          @operand = @raw.scan(/".*"/)
+        elsif @raw.check(%r{/})
+          @operand = @raw.scan(%r{/.*/})
+        else
+          @operand = @raw.scan(/-?[0-9a-zA-Z:@_=]+/)
+
+          if @raw.peek(1) == ','
+            @operand << @raw.scan(/[^\(]*/).rstrip
+          end
+        end
+
+        @raw.skip(/\s*\(?/)
+        @raw.skip(/\s*/)
+      end
+
+      def parse_lineno
+        n = @raw.scan(/[0-9]+/)
+        @lineno = n.to_i if n
+        @raw.skip(/\)/)
+      end
+
+      def parse_op_id
+        return unless sending?
+
+        callinfo = StringScanner.new @operand
+        callinfo.skip(/<callinfo!mid:/)
+        @op_id = callinfo.scan(/\S+(?=,)/)
+        callinfo.terminate
+      end
+
+      def vm_operative?
+        @service_instruction == false
+      end
+
       def gets_ivar?(ivar)
-        getinstancevariable? && @unparsed =~ /\A:#{ivar},/
+        !!(@opcode == 'getinstancevariable' && @operand == ":#{ivar}")
       end
 
       def dynamically_gets_ivar?(ivar)
-        opt_send_without_block? && @unparsed =~ /\A<callinfo!mid:instance_variable_get/
+        @op_id == 'instance_variable_get'
       end
 
       def dynamically_writes_ivar?(ivar)
-        opt_send_without_block? && @unparsed =~ /\A<callinfo!mid:instance_variable_set/
+        @op_id == 'instance_variable_set'
       end
 
       def evals?
-        opt_send_without_block? && @unparsed =~ /\A<callinfo!mid:eval/
+        @op_id == 'eval'
       end
 
       def putstrings?(str)
-        putstring? && @unparsed =~ /\A".*#{str}.*"/
+        !!(@opcode == 'putstring' && @operand.match(/".*#{str}.*"/))
       end
 
       def putobjects?(str)
-        putobject? &&
-          (
-            @unparsed =~ /\A:#{str}\s*(?:\([0-9\s]+\))?\z/ ||
-            @unparsed =~ /\A\[.*:#{str}.*\]\s*(?:\([0-9\s]+\))?\z/
-          )
+        !!(@opcode == 'putobject' && @operand.match(":#{str}"))
       end
 
       def duparrays?(str)
-        duparray? && @unparsed =~ /\A\[.*:#{str}.*\]\s*(?:\([0-9\s]+\))?\z/
-      end
-
-      def evaling_str
-        @evaling_str ||= parse_evaling_str
+        !!(@opcode == 'duparray' && @operand.match(":#{str}"))
       end
 
       def writes_ivar?(ivar)
-        setinstancevariable? && @unparsed =~ /\A:#{ivar},/
+        !!(@opcode == 'setinstancevariable' && @operand == ":#{ivar}=")
       end
 
       def sends_msg?(message)
-        sending? && @unparsed =~ /\A<callinfo!mid:#{message}/
+        !!(sending? && @op_id == message)
       end
 
-      def find_message
-        return unless sending?
-        @unparsed.match(/<callinfo!mid:(.+), argc:[0-9]+, .+>/)[1]
+      def operand
+        @operand
+      end
+
+      def evaling_str
+        @evaling_str ||= @operand.sub!(/\A"(.+)"/, '\1')
       end
 
       private
 
-      def getinstancevariable?
-        @instruction == 'getinstancevariable'
-      end
-
-      def opt_send_without_block?
-        @instruction == 'opt_send_without_block'
-      end
-
-      def putstring?
-        @instruction == 'putstring'
-      end
-
-      def putobject?
-        @instruction == 'putobject'
-      end
-
-      def setinstancevariable?
-        @instruction == 'setinstancevariable'
-      end
-
-      def duparray?
-        @instruction == 'duparray'
-      end
-
-      def send?
-        @instruction == 'send'
-      end
-
       def sending?
-        opt_send_without_block? || send?
-      end
-
-      def parse_pos
-        @unparsed.sub!(INSTR_POS_PATTERN, '')
-        $MATCH.to_i
-      end
-
-      def parse_instruction
-        @unparsed.sub!(/\A[a-zA-Z0-9_]+\s+/, '')
-        $MATCH.rstrip
-      end
-
-      def parse_evaling_str
-        @unparsed.sub!(/\A"(.+)"/, '')
-        $1
-      end
-
-      def service_instruction?
-        @raw_instruction !~ INSTR_POS_PATTERN
+        @opcode == 'opt_send_without_block' || @opcode == 'send'
       end
     end
   end

@@ -6,40 +6,32 @@ class SystemNavigation
 
       def with_all_sub_and_superclasses
         Enumerator.new do |y|
-          self.with_all_subclasses_do.each { |klass| y << klass }
-          self.with_all_superclasses_do.each { |klass| y << klass }
+          self.with_all_subclasses.each { |klass| y << klass }
+          self.with_all_superclasses.each { |klass| y << klass }
         end
       end
 
-      def with_all_subclasses_do
-        Enumerator.new do |y|
-          self.with_all_subclasses.each do |subclass|
-            y.yield subclass
-          end
-        end
-      end
-
-      # Answer an Array of the receiver, the receiver's descendents, and the
-      # receiver's descendents subclasses.
       def with_all_subclasses
-        self.all_subclasses.push(self)
+        Enumerator.new do |y|
+          self.all_subclasses.push(self).each { |subclass| y << subclass }
+        end
       end
 
       def all_subclasses
         all_subclasses = []
 
-        ObjectSpace.each_object(singleton_class) do |klass|
+        ObjectSpace.each_object(self.singleton_class) do |klass|
           all_subclasses.unshift(klass) if klass != self
         end
 
         all_subclasses
       end
 
-      def with_all_superclasses_do
+      def with_all_superclasses
         if self.superclass
           Enumerator.new do |y|
             y.yield self.superclass
-            self.superclass.with_all_superclasses_do.each { |klass| y << klass }
+            self.superclass.with_all_superclasses.each { |klass| y << klass }
           end
         else
           []
@@ -49,50 +41,58 @@ class SystemNavigation
       # Answer a set of selectors whose methods access the argument, ivar, as a
       # named instance variable.
       def which_selectors_access(ivar)
-        self.selectors.select do |sel|
+        self.reachable_selectors.select do |sel|
           meth = self.instance_method(sel)
           meth.reads_field?(ivar) || meth.writes_field?(ivar)
         end
       end
 
-      def selectors
-        [self.all_method_selectors, self.ancestor_selectors].flatten
+      def select_methods_that_refer_to(literal)
+        MethodQuery.execute(
+          collection: self.own_methods,
+          query: :find_literal,
+          literal: literal,
+          behavior: self).as_array
       end
 
-      def closest_ancestors
-        ancestors_list = self.ancestors - [self]
-
-        if self.is_a?(Class)
-          ancestors_list.split(self.superclass).first || []
-        else
-          ancestors_list
-        end
+      def reachable_selectors
+        MethodHash.create(based_on: self, include_super: true)
       end
 
-      def ancestor_selectors
-        if closest_ancestors.any?
-          closest_ancestors.flat_map { |ancestor| ancestor.all_method_selectors }
-        else
-          []
-        end
+      def own_selectors
+        MethodHash.create(based_on: self, include_super: false)
       end
 
-      def which_selectors_refer_to(literal)
-        who = []
+      def reachable_methods
+        MethodQuery.execute(
+          collection: self.reachable_selectors,
+          query: :convert_to_methods,
+          behavior: self)
+      end
 
-        self.selectors_and_methods do |selector, method|
-          if method.has_literal?(literal)
-            who << selector
-          end
-        end
+      def own_methods
+        MethodQuery.execute(
+          collection: self.own_selectors,
+          query: :convert_to_methods,
+          behavior: self)
+      end
 
-        who
+      def reachable_method_hash
+        MethodQuery.execute(
+          collection: self.reachable_methods,
+          query: :tupleize)
+      end
+
+      def own_method_hash
+        MethodQuery.execute(
+          collection: self.own_methods,
+          query: :tupleize)
       end
 
       def which_global_selectors_refer_to(literal)
         who = []
 
-        self.selectors_and_methods(only_own: false) do |selector, method|
+        self.own_selectors_and_methods do |selector, method|
           if method.has_literal?(literal)
             who << selector
           end
@@ -101,41 +101,10 @@ class SystemNavigation
         who
       end
 
-      def selectors_and_methods(only_own: true, &block)
-        self.method_hash(only_own: only_own).each_pair do |selector, method|
-          block.call(selector, method)
-        end
-      end
-
-      def method_hash(only_own: true)
-        Hash[self.all_methods(only_own: only_own).map do |method|
-               [method.original_name, method]
-             end]
-      end
-
-      def all_method_selectors
-        self.instance_methods(false) + self.private_instance_methods(false)
-      end
-
-      def all_methods(only_own: true)
-        selectors.map do |selector|
-          method = self.instance_method(selector)
-          if only_own
-            method if self.own_method?(method)
-          else
-            method
-          end
-        end.compact
-      end
-
-      def includes_selector?(selector)
-        self.all_method_selectors.include?(selector)
-      end
-
       def belongs_to?(gem_name)
         gemspecs = Gem::Specification.find_all_by_name(gem_name)
         return false if gemspecs.none? || gemspecs.count != 1
-        return false if self.all_methods.none?
+        return false if self.reachable_selectors.none?
 
         gemspec = gemspecs.first
         pattern = %r{(?:/gems/#{gem_name}-#{gemspec.version}/)|(?:/lib/ruby/[[0-9]\.]+/#{gem_name}/)}
@@ -145,13 +114,17 @@ class SystemNavigation
 
         if self.contains_only_rb_methods?
           if self.all_neighbour_methods?
-            !!self.all_methods.first.source_location.first.match(pattern)
+            MethodQuery.execute(
+              collection: self.own_methods,
+              query: :all_belong_to_gem?,
+              pattern: pattern)
           else
             grouped_locations = self.group_locations_by_path
 
             if grouped_locations.all? { |l| l[0].match(pattern) }
               return true
             else
+                            binding.pry if               match_location.call(grouped_locations)
               match_location.call(grouped_locations)
             end
           end
@@ -168,49 +141,49 @@ class SystemNavigation
       end
 
       def contains_only_rb_methods?
-        self.all_methods.all? { |meth| meth.source_location }
+        MethodQuery.execute(
+          collection: self.own_methods,
+          query: :all_with_source_location?)
       end
 
       def all_neighbour_methods?
-        self.all_methods.map { |meth| meth.source_location[0] }.uniq.count == 1
+        MethodQuery.execute(
+          collection: self.own_methods,
+          query: :all_in_the_same_file?)
       end
 
       def group_locations_by_path
-        grouped = self.all_methods.map { |m| m.source_location && m.source_location.first || nil }.
-                  group_by(&:itself).map{ |k,v| [k, v.count] }
-        Hash[grouped]
+        MethodQuery.execute(
+          collection: self.reachable_methods,
+          query: :group_by_path)
       end
 
       def select_matching_methods(string, match_case)
-        self.all_methods.select do |method|
-          self.own_method?(method) && method.source_contains?(string, match_case)
+        self.own_methods.select do |method|
+          method.source_contains?(string, match_case)
         end
       end
 
-      def own_method?(method)
-        method.owner == self
-      end
-
       def c_methods
-        self.all_methods(only_own: true).select do |method|
+        self.own_methods.select do |method|
           method.c_method?
         end
       end
 
       def rb_methods
-        self.all_methods(only_own: true).select do |method|
+        self.own_methods.select do |method|
           method.rb_method?
         end
       end
 
       def which_selectors_send(message)
-        self.all_methods(only_own: true).select do |method|
+        self.own_methods.select do |method|
           method.sends_message?(message)
         end
       end
 
       def all_messages
-        self.all_method_selectors.select do |selector|
+        self.reachable_selectors.select do |selector|
           self.instance_method(selector).sent_messages.uniq
         end
       end

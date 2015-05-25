@@ -4,6 +4,8 @@ class SystemNavigation
       self.new(method: method)
     end
 
+    attr_reader :method
+
     def initialize(method: nil, iseq: nil)
       @method = method
       @iseq = iseq
@@ -21,16 +23,11 @@ class SystemNavigation
       iseqs = @iseq.split("\n")
 
       if iseqs.any?
-        iseqs.map do |instruction|
-          Instruction.parse(instruction)
-        end
+        instructions = iseqs.map { |instruction| Instruction.parse(instruction) }
+        instructions.compact.select(&:vm_operative?)
       else
         Instruction::AttrInstruction.parse(@method, sym) || []
       end
-    end
-
-    def unbound_method
-      @method
     end
   end
 end
