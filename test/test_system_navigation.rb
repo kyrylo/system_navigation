@@ -13,21 +13,6 @@ class TestSystemNavigation < Minitest::Test
     @sn = SystemNavigation.default
   end
 
-  def test_all_implementors_of
-    test_class = Class.new do
-      def bongo_bongo; end
-
-      def foo; end
-    end
-
-    test_module = Module.new do
-      def bongo_bongo; end
-    end
-
-    assert_equal [test_module, test_class].sort_by(&:hash),
-                 @sn.all_implementors_of(:bongo_bongo).sort_by(&:hash)
-  end
-
   def test_all_methods_with_source
     test_module = Module.new do
       def bingo
