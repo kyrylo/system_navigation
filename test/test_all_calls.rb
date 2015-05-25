@@ -154,8 +154,8 @@ class TestSystemNavigationAllCalls < Minitest::Test
   end
 
   def test_all_calls_gem
-    expected = [ Minitest.singleton_method(:autorun),
-                 Minitest::Runnable.singleton_method(:on_signal),
+    expected = [ Minitest.singleton_class.instance_method(:autorun),
+                 Minitest::Runnable.singleton_class.instance_method(:on_signal),
                  Minitest::Spec::DSL.instance_method(:spec_type) ]
     assert_equal expected, @sn.all_calls(on: :call, gem: 'minitest')
   end

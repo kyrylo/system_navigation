@@ -153,7 +153,7 @@ class SystemNavigation
 
       def group_locations_by_path
         MethodQuery.execute(
-          collection: self.reachable_methods,
+          collection: self.own_methods,
           query: :group_by_path)
       end
 

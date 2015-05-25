@@ -53,7 +53,7 @@ class SystemNavigation
               elsif gem
                 self.all_behaviors_in_gem_named(gem)
               else
-                self.all_behaviors
+                self.all_classes_and_modules
               end
 
     subject.flat_map { |behavior| behavior.select_methods_that_refer_to(on) }
