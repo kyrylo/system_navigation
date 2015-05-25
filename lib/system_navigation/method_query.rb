@@ -89,6 +89,24 @@ class SystemNavigation
       end
     end
 
+    def select_c_methods
+      @collection.as_array.select do |method|
+        compiled_method = CompiledMethod.compile(method)
+        if compiled_method.c_method?
+          compiled_method.unwrap
+        end
+      end
+    end
+
+    def select_rb_methods
+      @collection.as_array.select do |method|
+        compiled_method = CompiledMethod.compile(method)
+        if compiled_method.rb_method?
+          compiled_method.unwrap
+        end
+      end
+    end
+
     protected
 
     def instance_and_singleton_do(for_instance: nil, for_singleton: nil, for_all: nil)

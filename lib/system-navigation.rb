@@ -86,7 +86,7 @@ class SystemNavigation
   end
 
   def all_methods
-    self.all_behaviors.flat_map { |klass| klass.all_methods }
+    self.all_behaviors.flat_map { |klass| klass.own_methods }
   end
 
   def all_methods_with_source(string:, match_case: true)
@@ -96,11 +96,11 @@ class SystemNavigation
   end
 
   def all_c_methods
-    self.all_behaviors.flat_map { |klass| klass.c_methods }
+    self.all_behaviors.flat_map { |klass| klass.select_c_methods }
   end
 
   def all_rb_methods
-    self.all_behaviors.flat_map { |klass| klass.rb_methods }
+    self.all_behaviors.flat_map { |klass| klass.select_rb_methods }
   end
 
   def all_senders(of:)

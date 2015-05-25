@@ -66,6 +66,14 @@ class SystemNavigation
       end
     end
 
+    def c_method?
+      @method.source_location.nil?
+    end
+
+    def rb_method?
+      !self.c_method?
+    end
+
     protected
 
     def scan_for

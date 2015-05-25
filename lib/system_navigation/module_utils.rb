@@ -173,16 +173,16 @@ class SystemNavigation
           match_case: match_case)
       end
 
-      def c_methods
-        self.own_methods.select do |method|
-          method.c_method?
-        end
+      def select_c_methods
+        MethodQuery.execute(
+          collection: self.own_methods,
+          query: :select_c_methods)
       end
 
-      def rb_methods
-        self.own_methods.select do |method|
-          method.rb_method?
-        end
+      def select_rb_methods
+        MethodQuery.execute(
+          collection: self.own_methods,
+          query: :select_rb_methods)
       end
 
       def select_senders_of(message)

@@ -5,13 +5,6 @@ class TestSystemNavigation < Minitest::Test
     @sn = SystemNavigation.default
   end
 
-  def test_rb_and_c_methods
-    rb_methods_cnt = @sn.all_rb_methods.count
-    c_methods_cnt = @sn.all_c_methods.count
-
-    assert_equal (rb_methods_cnt + c_methods_cnt), @sn.all_methods.count
-  end
-
   def test_all_stores
     test_class = Class.new do
       def bingo
@@ -27,7 +20,7 @@ class TestSystemNavigation < Minitest::Test
       end
 
       def bish
-        @cool_object += 1
+        @cool_object += 1g
       end
     end
 
