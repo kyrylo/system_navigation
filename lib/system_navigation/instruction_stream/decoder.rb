@@ -9,12 +9,12 @@ class SystemNavigation
         end
       end
 
-      def self.ivar_read_scan(_for:, with:)
+      def ivar_read_scan(_for:, with:)
         self.with_iseq(_for: _for, with: with) do |iseqs, instruction, idx|
-          next(instruction) if instruction.gets_ivar?(_for)
+          next(instruction) if instruction.reads_ivar?(_for)
           prev_instruction = iseqs[idx.pred]
 
-          next(instruction) if instruction.dynamically_gets_ivar?(_for) && prev_instruction.putobjects?(_for)
+          next(instruction) if instruction.dynamically_reads_ivar? && prev_instruction.putobjects?(_for)
 
           next unless performs_an_eval?(_for, instruction, prev_instruction)
 
@@ -22,12 +22,12 @@ class SystemNavigation
         end
       end
 
-      def self.ivar_write_scan(_for:, with:)
+      def ivar_write_scan(_for:, with:)
         self.with_iseq(_for: _for, with: with) do |iseqs, instruction, idx|
           next(instruction) if instruction.writes_ivar?(_for)
           prev_instruction = iseqs[idx.pred]
 
-          next(instruction) if instruction.dynamically_writes_ivar?(_for) && prev_instruction.putobjects?(_for)
+          next(instruction) if instruction.dynamically_writes_ivar? && prev_instruction.putobjects?(_for)
 
           next unless performs_an_eval?(_for, instruction, prev_instruction)
 

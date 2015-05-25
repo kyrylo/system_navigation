@@ -38,13 +38,21 @@ class SystemNavigation
         end
       end
 
-      # Answer a set of selectors whose methods access the argument, ivar, as a
-      # named instance variable.
-      def which_selectors_access(ivar)
-        self.reachable_selectors.select do |sel|
-          meth = self.instance_method(sel)
-          meth.reads_field?(ivar) || meth.writes_field?(ivar)
+      def select_methods_that_access(ivar)
+        own_methods = self.own_methods
+        if ancestor_methods.any?
+          ancestor_methods.each do |methods|
+            own_methods.merge!(methods) do |_group, old_h, new_h|
+              old_h.merge!(new_h) { |_key, oldval, newval| oldval | newval }
+            end
+          end
         end
+
+        MethodQuery.execute(
+          collection: own_methods,
+          query: :find_accessing_methods,
+          ivar: ivar,
+          behavior: self).as_array
       end
 
       def select_methods_that_refer_to(literal)
@@ -191,6 +199,28 @@ class SystemNavigation
         self.selectors.select do |sel|
           meth = self.instance_method(sel)
           meth.writes_field?(ivar)
+        end
+      end
+
+      def ancestor_methods
+        ancestors_list = self.ancestors - [self]
+
+        closest_ancestors = if self.is_a?(Class)
+                              ancestors_list.split(self.superclass).first || []
+                            else
+                              ancestors_list
+                            end
+
+        closest_ancestors.flat_map do |ancestor|
+          collection = ancestor.own_selectors
+          collection[:public][:singleton] = [] # No inheritance for singletons.
+          collection[:private][:singleton] = [] # No inheritance for singletons.
+          collection[:protected][:singleton] = [] # No inheritance for singletons.
+
+          MethodQuery.execute(
+            collection: collection,
+            query: :convert_to_methods,
+            behavior: self)
         end
       end
     end

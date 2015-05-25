@@ -39,7 +39,7 @@ class SystemNavigation
 
   def all_accesses(to:, from:)
     from.with_all_sub_and_superclasses.flat_map do |klass|
-      klass.which_selectors_access(to).map { |sel| klass.instance_method(sel) }
+      klass.select_methods_that_access(to)
     end
   end
 

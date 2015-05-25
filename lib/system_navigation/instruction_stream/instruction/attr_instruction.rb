@@ -48,7 +48,7 @@ class SystemNavigation
           matched
         end
 
-        def gets_ivar?(_sym)
+        def reads_ivar?(_sym)
           true
         end
 
@@ -73,7 +73,7 @@ class SystemNavigation
           matched
         end
 
-        def gets_ivar?(_sym)
+        def reads_ivar?(_sym)
           false
         end
 

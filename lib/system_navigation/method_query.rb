@@ -56,7 +56,19 @@ class SystemNavigation
 
     def group_by_path
       Hash[@collection.as_array.map { |m| m.source_location && m.source_location.first || nil }.
-        group_by(&:itself).map{ |k,v| [k, v.count] }.reject { |k, _v| k.nil? }]
+            group_by(&:itself).map{ |k,v| [k, v.count] }.reject { |k, _v| k.nil? }]
+    end
+
+    def find_accessing_methods(ivar:)
+      self.instance_and_singleton_do(
+        for_all: proc { |_scope, _selectors, method|
+          compiled_method = CompiledMethod.compile(method)
+          if compiled_method.reads_field?(ivar) ||
+             compiled_method.writes_field?(ivar)
+            compiled_method.unwrap
+          end
+        }
+      )
     end
 
     protected

@@ -10,6 +10,12 @@ class SystemNavigation
       @scanner = SystemNavigation::InstructionStream.on(method)
     end
 
+    def compile
+      @scanner.decode
+
+      self
+    end
+
     def method_missing(method_name, *args, &block)
       @method.send(method_name, *args, &block)
     end
@@ -24,10 +30,16 @@ class SystemNavigation
       end
     end
 
-    def compile
-      @scanner.decode
+    def reads_field?(ivar)
+      self.scan_for do |s|
+        @decoder.ivar_read_scan(_for: ivar, with: s)
+      end
+    end
 
-      self
+    def writes_field?(ivar)
+      self.scan_for do |s|
+        @decoder.ivar_write_scan(_for: ivar, with: s)
+      end
     end
 
     protected

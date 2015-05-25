@@ -13,6 +13,7 @@ class SystemNavigation
         @evaling_str = nil
         @lineno = nil
         @op_id = nil
+        @ivar = nil
         @service_instruction = false
       end
 
@@ -24,6 +25,7 @@ class SystemNavigation
         parse_operand
         parse_lineno
         parse_op_id
+        parse_ivar
 
         self
       end
@@ -75,25 +77,41 @@ class SystemNavigation
       def parse_op_id
         return unless sending?
 
-        callinfo = StringScanner.new @operand
+        callinfo = StringScanner.new(@operand)
         callinfo.skip(/<callinfo!mid:/)
         @op_id = callinfo.scan(/\S+(?=,)/)
         callinfo.terminate
+      end
+
+      def parse_ivar
+        return unless accessing_ivar?
+
+        ivar = StringScanner.new(@operand)
+        @ivar = ivar.scan(/:[^,]+/)[1..-1].to_sym
+        ivar.terminate
+      end
+
+      def accessing_ivar?
+        @opcode == 'getinstancevariable' || @opcode == 'setinstancevariable'
       end
 
       def vm_operative?
         @service_instruction == false
       end
 
-      def gets_ivar?(ivar)
-        !!(@opcode == 'getinstancevariable' && @operand == ":#{ivar}")
+      def reads_ivar?(ivar)
+        @opcode == 'getinstancevariable' && @ivar == ivar
       end
 
-      def dynamically_gets_ivar?(ivar)
+      def writes_ivar?(ivar)
+        @opcode == 'setinstancevariable' && @ivar == ivar
+      end
+
+      def dynamically_reads_ivar?
         @op_id == 'instance_variable_get'
       end
 
-      def dynamically_writes_ivar?(ivar)
+      def dynamically_writes_ivar?
         @op_id == 'instance_variable_set'
       end
 
@@ -106,15 +124,11 @@ class SystemNavigation
       end
 
       def putobjects?(str)
-        !!(@opcode == 'putobject' && @operand.match(":#{str}"))
+        !!(@opcode == 'putobject' && @operand.match(/:#{str}\z/))
       end
 
       def duparrays?(str)
-        !!(@opcode == 'duparray' && @operand.match(":#{str}"))
-      end
-
-      def writes_ivar?(ivar)
-        !!(@opcode == 'setinstancevariable' && @operand == ":#{ivar}=")
+        !!(@opcode == 'duparray' && @operand.match(/:#{str}/))
       end
 
       def sends_msg?(message)

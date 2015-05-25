@@ -1,23 +1,7 @@
 class SystemNavigation
   module UnboundMethodUtils
     refine UnboundMethod do
-      def reads_field?(ivar)
-        self.scan_for do |s|
-          self.decoder.ivar_read_scan(_for: ivar, with: s)
-        end
-      end
 
-      def writes_field?(ivar)
-        self.scan_for do |s|
-          self.decoder.ivar_write_scan(_for: ivar, with: s)
-        end
-      end
-
-      def has_literal?(literal)
-        self.scan_for do |s|
-          self.decoder.literal_scan(_for: literal, with: s)
-        end
-      end
 
       def source_contains?(string, match_case)
         begin
