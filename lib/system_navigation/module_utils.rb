@@ -166,9 +166,11 @@ class SystemNavigation
       end
 
       def select_matching_methods(string, match_case)
-        self.own_methods.select do |method|
-          method.source_contains?(string, match_case)
-        end
+        MethodQuery.execute(
+          collection: self.own_methods,
+          query: :select_where_source_contains,
+          string: string,
+          match_case: match_case)
       end
 
       def c_methods

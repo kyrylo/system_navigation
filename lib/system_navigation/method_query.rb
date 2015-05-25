@@ -71,6 +71,15 @@ class SystemNavigation
       )
     end
 
+    def select_where_source_contains(string:, match_case:)
+      @collection.as_array.select do |method|
+        compiled_method = CompiledMethod.compile(method)
+        if compiled_method.source_contains?(string, match_case)
+          compiled_method.unwrap
+        end
+      end
+    end
+
     protected
 
     def instance_and_singleton_do(for_instance: nil, for_singleton: nil, for_all: nil)

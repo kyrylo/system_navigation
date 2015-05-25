@@ -1,26 +1,6 @@
 class SystemNavigation
   module UnboundMethodUtils
     refine UnboundMethod do
-
-
-      def source_contains?(string, match_case)
-        begin
-          source_code = self.source
-        rescue MethodSource::SourceNotFoundError, NoMethodError
-          source_code = ''
-        end
-
-        begin
-          source_comment = self.comment
-        rescue MethodSource::SourceNotFoundError, NoMethodError
-          source_comment = ''
-        end
-
-        code_and_comment = source_code + source_comment
-        code_and_comment.downcase! && string.downcase! unless match_case
-        !!code_and_comment.match(string)
-      end
-
       def c_method?
         self.source_location.nil?
       end

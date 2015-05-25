@@ -60,33 +60,23 @@ class SystemNavigation
   end
 
   def all_classes_implementing(selector)
-    self.all_classes.select do |klass|
-      klass.includes_selector?(selector)
-    end
+    self.all_classes.select { |klass| klass.includes_selector?(selector) }
   end
 
   def all_modules_implementing(selector)
-    self.all_modules.select do |mod|
-      mod.includes_selector?(selector)
-    end
+    self.all_modules.select { |mod| mod.includes_selector?(selector) }
   end
 
   def all_implementors_of(selector)
-    self.all_behaviors.select do |klass|
-      klass.includes_selector?(selector)
-    end
+    self.all_behaviors.select { |klass| klass.includes_selector?(selector) }
   end
 
   def all_classes_in_gem_named(gem_name)
-    self.all_classes.select do |klass|
-      klass.belongs_to?(gem_name)
-    end
+    self.all_classes.select { |klass| klass.belongs_to?(gem_name) }
   end
 
   def all_modules_in_gem_named(gem_name)
-    self.all_modules.select do |klass|
-      klass.belongs_to?(gem_name)
-    end
+    self.all_modules.select { |klass| klass.belongs_to?(gem_name) }
   end
 
   def all_behaviors_in_gem_named(gem_name)
