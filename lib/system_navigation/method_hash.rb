@@ -24,16 +24,26 @@ class SystemNavigation
           }
         })
       else
-        @hash.merge!({
-          public: {instance: [], singleton: []},
-          private: {instance: [], singleton: []},
-          protected: {instance: [], singleton: []}
-        })
+        @hash.merge!(empty_hash)
       end
     end
 
     def as_array
       self.values.map { |h| h[:instance] + h[:singleton] }.flatten.compact
+    end
+
+    def empty?
+      self == empty_hash
+    end
+
+    protected
+
+    def empty_hash
+      {
+        public: {instance: [], singleton: []},
+        private: {instance: [], singleton: []},
+        protected: {instance: [], singleton: []}
+      }
     end
   end
 end

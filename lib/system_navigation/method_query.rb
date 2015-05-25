@@ -31,7 +31,7 @@ class SystemNavigation
 
     def find_literal(literal:)
       self.instance_and_singleton_do(
-        for_instance: proc { |_scope, _selectors, method|
+        for_all: proc { |_scope, _selectors, method|
           compiled_method = CompiledMethod.compile(method)
           compiled_method.unwrap if compiled_method.has_literal?(literal)
         }

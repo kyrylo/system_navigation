@@ -104,7 +104,7 @@ class SystemNavigation
       def belongs_to?(gem_name)
         gemspecs = Gem::Specification.find_all_by_name(gem_name)
         return false if gemspecs.none? || gemspecs.count != 1
-        return false if self.reachable_selectors.none?
+        return false if self.own_selectors.empty?
 
         gemspec = gemspecs.first
         pattern = %r{(?:/gems/#{gem_name}-#{gemspec.version}/)|(?:/lib/ruby/[[0-9]\.]+/#{gem_name}/)}
