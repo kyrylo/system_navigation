@@ -65,22 +65,6 @@ class SystemNavigation
     end
   end
 
-  def all_local_calls(on:, of_class:)
-    references = []
-
-    select_methods = proc { |klass|
-      selectors = klass.which_global_selectors_refer_to(on)
-      selectors.map { |sel| klass.instance_method(sel) }
-    }
-
-    references << of_class.with_all_sub_and_superclasses.
-                 flat_map(&select_methods)
-    references << of_class.singleton_class.with_all_sub_and_superclasses.
-                 flat_map(&select_methods)
-    references.flatten
-  end
-
-
   def all_modules_implementing(selector)
     self.all_modules.select do |mod|
       mod.includes_selector?(selector)
