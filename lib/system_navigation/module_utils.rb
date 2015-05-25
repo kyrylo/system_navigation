@@ -38,7 +38,7 @@ class SystemNavigation
         end
       end
 
-      def select_methods_that_access(ivar)
+      def select_methods_that_access(ivar, only_get, only_set)
         own_methods = self.own_methods
         if ancestor_methods.any?
           ancestor_methods.each do |methods|
@@ -52,6 +52,8 @@ class SystemNavigation
           collection: own_methods,
           query: :find_accessing_methods,
           ivar: ivar,
+          only_get: only_get,
+          only_set: only_set,
           behavior: self).as_array
       end
 

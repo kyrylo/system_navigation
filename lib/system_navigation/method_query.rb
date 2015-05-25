@@ -59,13 +59,19 @@ class SystemNavigation
             group_by(&:itself).map{ |k,v| [k, v.count] }.reject { |k, _v| k.nil? }]
     end
 
-    def find_accessing_methods(ivar:)
+    def find_accessing_methods(ivar:, only_set:, only_get:)
       self.instance_and_singleton_do(
         for_all: proc { |_scope, _selectors, method|
           compiled_method = CompiledMethod.compile(method)
-          if compiled_method.reads_field?(ivar) ||
-             compiled_method.writes_field?(ivar)
-            compiled_method.unwrap
+          if only_set
+            compiled_method.unwrap if compiled_method.writes_field?(ivar)
+          elsif only_get
+            compiled_method.unwrap if compiled_method.reads_field?(ivar)
+          else
+            if compiled_method.reads_field?(ivar) ||
+               compiled_method.writes_field?(ivar)
+              compiled_method.unwrap
+            end
           end
         }
       )

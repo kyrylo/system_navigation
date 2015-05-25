@@ -37,9 +37,13 @@ class SystemNavigation
     @environment = SystemNavigation::RubyEnvironment.new
   end
 
-  def all_accesses(to:, from:)
+  def all_accesses(to:, from:, only_get: nil, only_set: nil)
+    if only_set && only_get
+      fail ArgumentError, 'both only_get and only_set were provided'
+    end
+
     from.with_all_sub_and_superclasses.flat_map do |klass|
-      klass.select_methods_that_access(to)
+      klass.select_methods_that_access(to, only_get, only_set)
     end
   end
 
@@ -111,13 +115,5 @@ class SystemNavigation
     self.all_behaviors.flat_map do |klass|
       klass.all_messages
     end.uniq
-  end
-
-  def all_stores(into:, from:)
-    from.with_all_sub_and_superclasses.flat_map do |klass|
-      klass.which_selectors_store_into(into).map do |sel|
-        klass.instance_method(sel)
-      end
-    end
   end
 end

@@ -124,4 +124,32 @@ class TestSystemNavigationAllCalls < Minitest::Test
     ]
     assert_equal expected, @sn.all_accesses(to: :@ivar, from: test_class.singleton_class)
   end
+
+  def test_all_accesses_only_set
+    test_class = Class.new do
+      def bingo
+        @cool_object = 1
+      end
+
+      def bango
+        @cool_object
+      end
+
+      def bongo
+        @cool_object.girls_love_me
+      end
+
+      def bish
+        @cool_object += 1
+      end
+    end
+
+    expected = [
+      test_class.instance_method(:bingo),
+      test_class.instance_method(:bish)
+    ]
+    assert_equal expected, @sn.all_accesses(to: :@cool_object,
+                                            from: test_class,
+                                            only_set: true)
+  end
 end
