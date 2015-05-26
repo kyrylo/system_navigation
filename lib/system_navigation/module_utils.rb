@@ -1,7 +1,6 @@
 class SystemNavigation
   module ModuleUtils
     refine Module do
-      using ArrayUtils
       using UnboundMethodUtils
 
       def with_all_sub_and_superclasses
@@ -208,25 +207,7 @@ class SystemNavigation
       end
 
       def ancestor_methods
-        ancestors_list = self.ancestors - [self]
-
-        closest_ancestors = if self.is_a?(Class)
-                              ancestors_list.split(self.superclass).first || []
-                            else
-                              ancestors_list
-                            end
-
-        closest_ancestors.flat_map do |ancestor|
-          collection = ancestor.own_selectors
-          collection[:public][:singleton] = [] # No inheritance for singletons.
-          collection[:private][:singleton] = [] # No inheritance for singletons.
-          collection[:protected][:singleton] = [] # No inheritance for singletons.
-
-          MethodQuery.execute(
-            collection: collection,
-            query: :convert_to_methods,
-            behavior: self)
-        end
+        AncestorMethodFinder.find_all_ancestors(of: self)
       end
 
       def includes_selector?(selector)

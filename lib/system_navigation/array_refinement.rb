@@ -1,5 +1,5 @@
 class SystemNavigation
-  module ArrayUtils
+  module ArrayRefinement
     refine Array do
       def split(value)
         results, arr = [[]], self.dup
