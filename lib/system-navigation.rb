@@ -85,17 +85,17 @@ class SystemNavigation
   #   #=> [#<UnboundMethod: B#foo>]
   #
   # @param to [Symbol] The name of the instance variable to search for
-  # @param from [Class,Module] The behaviour that limits the scope of the
+  # @param from [Class, Module] The behaviour that limits the scope of the
   #   query. Optional. If omitted, performs the query starting from the top of
   #   the object hierarchy (BasicObject)
-  # @param only_get [Boolean] Limnits the scope of the query only to methods
-  #   that write into the +ivar+. Optional. Mutually exclusive with +only_set+
+  # @param only_get [Boolean] Limits the scope of the query only to methods that
+  #   write into the +ivar+. Optional. Mutually exclusive with +only_set+
   # @param only_set [Boolean] Limits the scope of the query only to methods that
   #   read from the +ivar+. Optional. Mutually exclusive with +only_get+
   # @return [Array<UnboundMethod>] methods that access the +ivar+ according to
   #   the given scope
   # @note This is a very costly operation, if you don't provide the +from+
-  #   argument.
+  #   argument
   def all_accesses(to:, from: nil, only_get: nil, only_set: nil)
     if only_set && only_get
       fail ArgumentError, 'both only_get and only_set were provided'
@@ -106,6 +106,57 @@ class SystemNavigation
     end
   end
 
+  ##
+  # Query methods for literals they call.
+  #
+  # @example Global
+  #   class A
+  #     def foo
+  #       :hello
+  #     end
+  #   end
+  #
+  #   class B
+  #     def bar
+  #       :hello
+  #     end
+  #   end
+  #
+  #   sn.all_calls(on: :hello)
+  #   #=> [#<UnboundMethod: A#foo>, #<UnboundMethod: B#bar>]
+  #
+  # @example Local
+  #   class A
+  #     def foo
+  #       :hello
+  #     end
+  #   end
+  #
+  #   class B
+  #     def bar
+  #       :hello
+  #     end
+  #   end
+  #
+  #   sn.all_calls(on: :hello, from: A)
+  #   #=> [#<UnboundMethod: A#foo>]
+  #
+  # @example Gem
+  #   sn.all_calls(on: :singleton, gem: 'system-navigation')
+  #   #=> [...]
+  #
+  # @param on [Boolean, Integer, Float, String, Symbol, Array, Hash, Range,
+  #   Regexp, Proc] The literal to search for
+  # @param from [Class, Module] The behaviour that limits the scope of the
+  #   query. If it's present, the search will be performed from top to bottom
+  #   (only subclasses). Optional
+  # @param gem [String] Limits the scope of the query only to methods
+  #   that are defined in the RubyGem +gem+ classes and modules. Optional.
+  # @return [Array<UnboundMethod>] methods that call the given +literal+
+  # @note This is a very costly operation, if you don't provide the +from+
+  #   argument
+  # @note The list of supported literals can be found here:
+  #   http://ruby-doc.org/core-2.2.2/doc/syntax/literals_rdoc.html
   def all_calls(on:, from: nil, gem: nil)
     if from && gem
       fail ArgumentError, 'both from and gem were provided'
@@ -114,7 +165,7 @@ class SystemNavigation
     subject = if from
                 from.with_all_subclasses
               elsif gem
-                self.all_behaviors_in_gem_named(gem)
+                self.all_classes_and_modules_in_gem_named(gem)
               else
                 self.all_classes_and_modules
               end
@@ -142,7 +193,7 @@ class SystemNavigation
     self.all_modules.select { |klass| klass.belongs_to?(gem_name) }
   end
 
-  def all_behaviors_in_gem_named(gem_name)
+  def all_classes_and_modules_in_gem_named(gem_name)
     self.all_classes_and_modules.select do |klass|
       klass.belongs_to?(gem_name)
     end
