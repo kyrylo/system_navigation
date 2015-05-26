@@ -30,6 +30,8 @@ class A
 end
 
 sn = SystemNavigation.default
+
+sn.all_accesses(to: :@num, from: A)
 #=> [#<UnboundMethod: A#num>, #<UnboundMethod: A(M)#increment>, #<UnboundMethod: A#initialize>]
 ```
 
