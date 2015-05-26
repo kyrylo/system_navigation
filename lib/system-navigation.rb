@@ -53,18 +53,48 @@ class SystemNavigation
   #   end
   #
   #   sn.all_accesses(to: :@foo)
-  #   #=> [#<UnboundMethod: A#initialize>]
+  #   #=> [#<UnboundMethod: A#initialize>, #<UnboundMethod: B#foo>]
   #
-  # @param to [Symbol] The name of the instance variable
+  # @example Local
+  #   class A
+  #     def initialize
+  #       @foo = 1
+  #     end
+  #   end
+  #
+  #   class B
+  #     attr_reader :foo
+  #   end
+  #
+  #   sn.all_accesses(to: :@foo, from: B)
+  #   #=> [#<UnboundMethod: B#foo>]
+  #
+  # @example Only get invokations
+  #   class A
+  #     def initialize
+  #       @foo = 1
+  #     end
+  #   end
+  #
+  #   class B
+  #     attr_reader :foo
+  #   end
+  #
+  #   sn.all_accesses(to: :@foo, only_get: true)
+  #   #=> [#<UnboundMethod: B#foo>]
+  #
+  # @param to [Symbol] The name of the instance variable to search for
   # @param from [Class,Module] The behaviour that limits the scope of the
-  #   query. Optional. If omitted, performs the starting from the top of the
-  #   object hierarchy
-
-  # @param only_get [Boolean] Return only methods that write into the +ivar+.
-  #   Optional.
-  # @param only_set [Boolean] Return only methods that read from the +ivar+.
-  #   Optional
-  # @return [Array<UnboundMethod>] methods that access the +ivar+
+  #   query. Optional. If omitted, performs the query starting from the top of
+  #   the object hierarchy (BasicObject)
+  # @param only_get [Boolean] Limnits the scope of the query only to methods
+  #   that write into the +ivar+. Optional. Mutually exclusive with +only_set+
+  # @param only_set [Boolean] Limits the scope of the query only to methods that
+  #   read from the +ivar+. Optional. Mutually exclusive with +only_get+
+  # @return [Array<UnboundMethod>] methods that access the +ivar+ according to
+  #   the given scope
+  # @note This is a very costly operation, if you don't provide the +from+
+  #   argument.
   def all_accesses(to:, from: nil, only_get: nil, only_set: nil)
     if only_set && only_get
       fail ArgumentError, 'both only_get and only_set were provided'
