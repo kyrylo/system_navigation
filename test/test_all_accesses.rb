@@ -622,4 +622,16 @@ class TestSystemNavigationAllCalls < Minitest::Test
                                             from: test_class,
                                             only_set: true)
   end
+
+  def test_all_accesses_to_from_only_get_only_set
+    test_class = Class.new do
+    end
+
+    assert_raises(ArgumentError) do
+      @sn.all_accesses(to: :@foo,
+                       from: test_class,
+                       only_set: true,
+                       only_get: true)
+    end
+  end
 end
