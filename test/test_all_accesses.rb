@@ -564,7 +564,11 @@ class TestSystemNavigationAllCalls < Minitest::Test
 
     assert_equal expected,
                  @sn.all_accesses(to: :@test_all_accesses_to_from_extend_with_singleton,
+                                  from: test_class.singleton_class)
+    assert_equal [],
+                 @sn.all_accesses(to: :@test_all_accesses_to_from_extend_with_singleton,
                                   from: test_class)
+
   end
 
   def test_all_accesses_to_from_extend_singleton_with_singleton
@@ -586,11 +590,11 @@ class TestSystemNavigationAllCalls < Minitest::Test
   def test_all_accesses_to_from_only_get
     test_class = Class.new do
       def test_all_accesses_to_from_only_get
-        @test_all_accesses_to_from_only_set
+        @test_all_accesses_to_from_only_get
       end
 
       def test_all_accesses_to_from_only_set
-        @test_all_accesses_to_from_only_set = 1
+        @test_all_accesses_to_from_only_get = 1
       end
     end
 
