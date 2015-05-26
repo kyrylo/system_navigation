@@ -6,8 +6,8 @@ class SystemNavigation
 
     def initialize(method)
       @method = method
-      @decoder = InstructionStream::Decoder.new
       @scanner = SystemNavigation::InstructionStream.on(method)
+      @decoder = InstructionStream::Decoder.new(@scanner)
     end
 
     def compile
@@ -25,21 +25,19 @@ class SystemNavigation
     end
 
     def has_literal?(literal)
-      self.scan_for do |s|
-        @decoder.literal_scan(_for: literal, with: s)
-      end
+      self.scan_for { @decoder.literal_scan(literal) }
     end
 
     def reads_field?(ivar)
-      self.scan_for do |s|
-        @decoder.ivar_read_scan(_for: ivar, with: s)
-      end
+      self.scan_for { @decoder.ivar_read_scan(ivar) }
     end
 
     def writes_field?(ivar)
-      self.scan_for do |s|
-        @decoder.ivar_write_scan(_for: ivar, with: s)
-      end
+      self.scan_for { @decoder.ivar_write_scan(ivar) }
+    end
+
+    def sends_message?(message)
+      self.scan_for { @decoder.msg_send_scan(message) }
     end
 
     def source_contains?(string, match_case)
@@ -60,12 +58,6 @@ class SystemNavigation
       !!code_and_comment.match(string)
     end
 
-    def sends_message?(message)
-      self.scan_for do |s|
-        @decoder.msg_send_scan(_for: message, with: s)
-      end
-    end
-
     def c_method?
       @method.source_location.nil?
     end
@@ -77,7 +69,7 @@ class SystemNavigation
     protected
 
     def scan_for
-      @scanner.scan_for(yield @scanner)
+      @scanner.scan_for(yield)
     end
   end
 end

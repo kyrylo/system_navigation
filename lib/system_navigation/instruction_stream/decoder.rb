@@ -1,63 +1,60 @@
 class SystemNavigation
   class InstructionStream
     class Decoder
-      def with_iseq(_for: nil, with:, &block)
-        iseqs = with.iseqs(_for)
+      def initialize(scanner)
+        @scanner = scanner
+      end
 
-        iseqs.select.with_index do |instruction, idx|
-          block.call(iseqs, instruction, idx)
+      def select_instructions(literal:, method_name: nil, &block)
+        instructions = @scanner.iseqs(method_name || literal)
+
+        instructions.select.with_index do |instruction, i|
+          prev = instructions[i - 1]
+          prev_prev = instructions[i - 2]
+
+          returned = block.call(prev_prev, prev, instruction)
+          next instruction if returned
+
+          next if !(instruction.evals? && prev.putstrings?(literal))
+
+          self.class.new(iseq_from_eval(prev, @scanner.method)).
+            __send__(block.binding.eval('__method__'), literal).any?
         end
       end
 
-      def ivar_read_scan(_for:, with:)
-        self.with_iseq(_for: _for, with: with) do |iseqs, instruction, idx|
-          next(instruction) if instruction.reads_ivar?(_for)
-          prev_instruction = iseqs[idx.pred]
+      def ivar_read_scan(ivar)
+        self.select_instructions(literal: ivar) do |_prev_prev, prev, instruction|
+          next instruction if instruction.reads_ivar?(ivar)
 
-          next(instruction) if instruction.dynamically_reads_ivar? && prev_instruction.putobjects?(_for)
-
-          next unless performs_an_eval?(_for, instruction, prev_instruction)
-
-          ivar_read_scan(_for: _for, with: iseq_from_eval(prev_instruction)).any?
+          if instruction.dynamically_reads_ivar? && prev.putobjects?(ivar)
+            next instruction
+          end
         end
       end
 
-      def ivar_write_scan(_for:, with:)
-        self.with_iseq(_for: _for, with: with) do |iseqs, instruction, idx|
-          next(instruction) if instruction.writes_ivar?(_for)
-          prev_instruction = iseqs[idx.pred]
+      def ivar_write_scan(ivar)
+        self.select_instructions(literal: ivar) do |prev_prev, prev, instruction|
+          next instruction if instruction.writes_ivar?(ivar)
 
-          next(instruction) if instruction.dynamically_writes_ivar? && iseqs[idx-2].putobjects?(_for)
-
-          next unless performs_an_eval?(_for, instruction, prev_instruction)
-
-          ivar_write_scan(_for: _for, with: iseq_from_eval(prev_instruction)).any?
+          if instruction.dynamically_writes_ivar? && prev_prev.putobjects?(ivar)
+            next instruction
+          end
         end
       end
 
-      def literal_scan(_for:, with:)
-        name = with.method.original_name
+      def literal_scan(literal)
+        name = @scanner.method.original_name
 
-        self.with_iseq(_for: name, with: with) do |iseqs, instruction, idx|
-          next(instruction) if instruction.putobjects?(_for) || instruction.duparrays?(_for)
-
-          prev_instruction = iseqs[idx.pred]
-
-          next unless performs_an_eval?(_for, instruction, prev_instruction)
-
-          literal_scan(_for: _for, with: iseq_from_eval(prev_instruction, with.method)).any?
+        self.select_instructions(method_name: name, literal: literal) do |_prev_prev, prev, instruction|
+          if instruction.putobjects?(literal) || instruction.duparrays?(literal)
+            next instruction
+          end
         end
       end
 
-      def msg_send_scan(_for:, with:)
-        self.with_iseq(_for: _for, with: with) do |iseqs, instruction, idx|
-          next(instruction) if instruction.sends_msg?(_for)
-
-          prev_instruction = iseqs[idx.pred]
-
-          next unless performs_an_eval?(_for, instruction, prev_instruction)
-
-          msg_send_scan(_for: _for, with: iseq_from_eval(prev_instruction, with.method)).any?
+      def msg_send_scan(message)
+        self.select_instructions(literal: message) do |_prev_prev, prev, instruction|
+          next instruction if instruction.sends_msg?(message)
         end
       end
 
@@ -69,13 +66,11 @@ class SystemNavigation
 
       private
 
-      def performs_an_eval?(_for, instruction, prev_instruction)
-        instruction.evals? && prev_instruction.putstrings?(_for)
-      end
-
       def iseq_from_eval(instruction, method = nil)
-        # Avoid segfault. See: https://bugs.ruby-lang.org/issues/11159
+        # Avoid segfault if evaling_str is nil.
+        # See: https://bugs.ruby-lang.org/issues/11159
         uncompiled = unwind_eval(instruction.evaling_str || nil.to_s)
+        uncompiled.gsub!(/\\n/, ?\n)
 
         iseq = RubyVM::InstructionSequence.compile(uncompiled).disasm
         InstructionStream.new(method: method, iseq: iseq)
@@ -83,6 +78,10 @@ class SystemNavigation
 
       def unwind_eval(eval_string)
         eval_string.sub(/\A(eval\(\\?["'])*/, '').sub(/(\\?["']\))*\z/, '')
+      end
+
+      def sanitize_newlines(eval_string)
+        eval_string.gsub(/\\n/, ?\n)
       end
     end
   end
