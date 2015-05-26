@@ -10,6 +10,31 @@ SystemNavigation is a Ruby library that provides support for the navigation and
 introspection of Ruby programs. It is inspired by the eponymous class in
 Pharo/Squeak.
 
+Sneak peek:
+
+```ruby
+module M
+  def increment
+    @num + 1
+  end
+end
+
+class A
+  include M
+
+  attr_reader :num
+
+  def initialize(num)
+    @num = num
+  end
+end
+
+sn = SystemNavigation.default
+#=> [#<UnboundMethod: A#num>, #<UnboundMethod: A(M)#increment>, #<UnboundMethod: A#initialize>]
+```
+
+And many more...
+
 Installation
 ------------
 
