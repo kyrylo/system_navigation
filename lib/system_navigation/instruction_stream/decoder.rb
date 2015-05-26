@@ -27,7 +27,7 @@ class SystemNavigation
           next(instruction) if instruction.writes_ivar?(_for)
           prev_instruction = iseqs[idx.pred]
 
-          next(instruction) if instruction.dynamically_writes_ivar? && prev_instruction.putobjects?(_for)
+          next(instruction) if instruction.dynamically_writes_ivar? && iseqs[idx-2].putobjects?(_for)
 
           next unless performs_an_eval?(_for, instruction, prev_instruction)
 
@@ -75,10 +75,14 @@ class SystemNavigation
 
       def iseq_from_eval(instruction, method = nil)
         # Avoid segfault. See: https://bugs.ruby-lang.org/issues/11159
-        uncompiled = instruction.evaling_str || nil.to_s
+        uncompiled = unwind_eval(instruction.evaling_str || nil.to_s)
 
         iseq = RubyVM::InstructionSequence.compile(uncompiled).disasm
         InstructionStream.new(method: method, iseq: iseq)
+      end
+
+      def unwind_eval(eval_string)
+        eval_string.sub(/\A(eval\(\\?["'])*/, '').sub(/(\\?["']\))*\z/, '')
       end
     end
   end

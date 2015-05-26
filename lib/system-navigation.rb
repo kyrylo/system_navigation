@@ -37,12 +37,40 @@ class SystemNavigation
     @environment = SystemNavigation::RubyEnvironment.new
   end
 
-  def all_accesses(to:, from:, only_get: nil, only_set: nil)
+  ##
+  # Query methods for instance variables in descending (subclasses) and
+  # ascending (superclasses) fashion.
+  #
+  # @example Global
+  #   class A
+  #     def initialize
+  #       @foo = 1
+  #     end
+  #   end
+  #
+  #   class B
+  #     attr_reader :foo
+  #   end
+  #
+  #   sn.all_accesses(to: :@foo)
+  #   #=> [#<UnboundMethod: A#initialize>]
+  #
+  # @param to [Symbol] The name of the instance variable
+  # @param from [Class,Module] The behaviour that limits the scope of the
+  #   query. Optional. If omitted, performs the starting from the top of the
+  #   object hierarchy
+
+  # @param only_get [Boolean] Return only methods that write into the +ivar+.
+  #   Optional.
+  # @param only_set [Boolean] Return only methods that read from the +ivar+.
+  #   Optional
+  # @return [Array<UnboundMethod>] methods that access the +ivar+
+  def all_accesses(to:, from: nil, only_get: nil, only_set: nil)
     if only_set && only_get
       fail ArgumentError, 'both only_get and only_set were provided'
     end
 
-    from.with_all_sub_and_superclasses.flat_map do |klass|
+    (from || BasicObject).with_all_sub_and_superclasses.flat_map do |klass|
       klass.select_methods_that_access(to, only_get, only_set)
     end
   end
