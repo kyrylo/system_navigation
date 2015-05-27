@@ -186,6 +186,15 @@ class SystemNavigation
     self.all_classes.select { |klass| klass.includes_selector?(selector) }
   end
 
+  ##
+  # Query modules for the methods they implement.
+  #
+  # @example
+  #   sn.all_classes_implementing(:select)
+  #   #=> [Enumerable, Kernel, #<Module:0x007f56daf92918>]
+  #
+  # @param selector [Symbol] the name of the method to be searched for
+  # @return [Array<Class>] modules that implement +selector+
   def all_modules_implementing(selector)
     self.all_modules.select { |mod| mod.includes_selector?(selector) }
   end

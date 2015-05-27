@@ -7,15 +7,39 @@ class TestSystemNavigationAllModulesImplementing < Minitest::Test
 
   def test_all_modules_implementing
     _test_class = Class.new do
-      def bingo_bingo; end
-
-      def foo; end
+      def test_all_modules_implementing
+      end
     end
 
     test_module = Module.new do
-      def bingo_bingo; end
+      def test_all_modules_implementing
+      end
     end
 
-    assert_equal [test_module], @sn.all_modules_implementing(:bingo_bingo)
+    expected  = [
+      test_module
+    ]
+
+    assert_equal expected,
+                 @sn.all_modules_implementing(:test_all_modules_implementing)
+  end
+
+  def test_all_modules_implementing_class_method
+    _test_class = Class.new do
+      def self.test_all_modules_implementing_class_method
+      end
+    end
+
+    test_module = Module.new do
+      def self.test_all_modules_implementing_class_method
+      end
+    end
+
+    expected = [
+      test_module
+    ]
+
+    assert_equal expected,
+                 @sn.all_modules_implementing(:test_all_modules_implementing_class_method)
   end
 end
