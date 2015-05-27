@@ -55,7 +55,7 @@ result you expect isn't what you actually get.
 
 ### API
 
-See the [API.md](/doc/API.md) file.
+See the [API.md](/docs/API.md) file.
 
 Limitations
 -----------
