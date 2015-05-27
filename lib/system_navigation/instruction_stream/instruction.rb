@@ -124,11 +124,11 @@ class SystemNavigation
       end
 
       def putobjects?(str)
-        !!(@opcode == 'putobject' && @operand.match(/(?::#{str}\z|\[.*:#{str}.*\])/))
+        !!(@opcode == 'putobject' && @operand.match(/(?::#{str}\z|\[.*:#{str},.*\])/))
       end
 
       def duparrays?(str)
-        !!(@opcode == 'duparray' && @operand.match(/:#{str}/))
+        !!(@opcode == 'duparray' && @operand.match(/:#{str}[,\]]/))
       end
 
       def sends_msg?(message)
