@@ -173,6 +173,15 @@ class SystemNavigation
     subject.flat_map { |behavior| behavior.select_methods_that_refer_to(on) }
   end
 
+  ##
+  # Query classes for the methods they implement.
+  #
+  # @example
+  #   sn.all_classes_implementing(:~)
+  #   #=> [Regexp, Bignum, Fixnum]
+  #
+  # @param selector [Symbol] the name of the method to be searched for
+  # @return [Array<Class>] classes that implement +selector+
   def all_classes_implementing(selector)
     self.all_classes.select { |klass| klass.includes_selector?(selector) }
   end
