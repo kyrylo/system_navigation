@@ -535,5 +535,21 @@ class TestSystemNavigationAllCalls < Minitest::Test
                    @sn.all_calls(on: [1, :test_all_calls_on_from_array, 3.0],
                                  from: test_class)
     end
+
+    def test_all_calls_on_from_range
+      skip
+
+      test_class = Class.new do
+        def test_all_calls_on_from_range
+          0...2.test_all_calls_on_from_range
+        end
+      end
+
+      expected = [
+        test_class.instance_method(:test_all_calls_on_from_range)
+      ]
+
+      assert_equal expected, @sn.all_calls(on: 0...2, from: test_class)
+    end
   end
 end

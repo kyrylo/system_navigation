@@ -146,7 +146,7 @@ class SystemNavigation
   #   #=> [...]
   #
   # @param on [Boolean, Integer, Float, String, Symbol, Array, Hash, Range,
-  #   Regexp, Proc] The literal to search for
+  #   Regexp] The literal to search for
   # @param from [Class, Module] The behaviour that limits the scope of the
   #   query. If it's present, the search will be performed from top to bottom
   #   (only subclasses). Optional
