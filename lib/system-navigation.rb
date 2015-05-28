@@ -265,8 +265,8 @@ class SystemNavigation
   #
   # @return [Array<UnboundMethod>] all methods that exist
   def all_methods
-    self.all_classes_and_modules.map do |klass|
-      klass.own_methods.as_array
+    self.all_classes_and_modules.map do |klassmod|
+      klassmod.own_methods.as_array
     end.flatten
   end
 
@@ -302,26 +302,55 @@ class SystemNavigation
   # @return [Array<UnboundMethod>] methods that matched +string+
   # @note This is a very costly operation
   def all_methods_with_source(string:, match_case: true)
-    self.all_classes_and_modules.flat_map do |klass|
-      klass.select_matching_methods(string, match_case)
+    self.all_classes_and_modules.flat_map do |klassmod|
+      klassmod.select_matching_methods(string, match_case)
     end
   end
 
+  ##
+  # Get all methods implemented in C.
+  #
+  # @example
+  #   sn.all_c_methods
+  #   #=> [#<UnboundMethod: #<Class:Etc>#getlogin>, ...]
+  #
+  # @return [Array<UnboundMethod>] all methods that were implemented in C
   def all_c_methods
-    self.all_behaviors.flat_map { |klass| klass.select_c_methods }
+    self.all_classes_and_modules.flat_map do |klassmod|
+      klassmod.select_c_methods
+    end
   end
 
+  ##
+  # Get all methods implemented in Ruby.
+  #
+  # @example
+  #   sn.all_rb_methods
+  #   #=> [#<UnboundMethod: Gem::Dependency#name>, ...]
+  #
+  # @return [Array<UnboundMethod>] all methods that were implemented in Ruby
   def all_rb_methods
-    self.all_behaviors.flat_map { |klass| klass.select_rb_methods }
+    self.all_classes_and_modules.flat_map do |klassmod|
+      klassmod.select_rb_methods
+    end
   end
 
-  def all_senders(of:)
+  ##
+  # Get all methods that implement +message+.
+  #
+  # @example
+  #   sn.all_senders_of(:puts)
+  #   #=> []
+  #
+  # @param message [Symbol] The name of the method you're interested in
+  # @return [Array<UnboundMethod>] all methods that send +message
+  def all_senders_of(message)
     self.all_classes_and_modules.flat_map { |klass| klass.select_senders_of(of) }
   end
 
   def all_sent_messages
-    self.all_behaviors.flat_map do |klass|
-      klass.all_messages
+    self.all_classes_and_modules.flat_map do |klassmod|
+      klassmod.all_messages
     end.uniq
   end
 end

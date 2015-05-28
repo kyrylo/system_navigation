@@ -1,11 +1,11 @@
 require_relative 'helper'
 
-class TestSystemNavigation < Minitest::Test
+class TestSystemNavigationAllSendersOf < Minitest::Test
   def setup
     @sn = SystemNavigation.default
   end
 
-   def test_all_senders
+   def test_all_senders_of
     test_module = Module.new do
       def bingo; twerkin_barimen; end
     end
@@ -45,6 +45,6 @@ class TestSystemNavigation < Minitest::Test
       self.class.instance_method(__method__)
     ]
 
-    assert_equal expected, @sn.all_senders(of: :twerkin_barimen)
+    assert_equal expected, @sn.all_senders_of(:twerkin_barimen)
   end
 end
