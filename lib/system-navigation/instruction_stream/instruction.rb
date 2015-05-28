@@ -57,7 +57,7 @@ class SystemNavigation
         elsif @raw.check(%r{/})
           @operand = @raw.scan(%r{/.*/})
         else
-          @operand = @raw.scan(/-?[0-9a-zA-Z:@_=]+/)
+          @operand = @raw.scan(/-?[0-9a-zA-Z:@_=.]+/)
 
           if @raw.peek(1) == ','
             @operand << @raw.scan(/[^\(]*/).rstrip

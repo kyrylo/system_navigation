@@ -339,8 +339,6 @@ class TestSystemNavigationAllCalls < Minitest::Test
   end
 
   def test_all_calls_on_from_100
-    skip
-
     test_class = Class.new do
       def test_all_calls_on_from_100
         100
@@ -355,8 +353,6 @@ class TestSystemNavigationAllCalls < Minitest::Test
   end
 
   def test_all_calls_on_from_1_00
-    skip
-
     test_class = Class.new do
       def test_all_calls_on_from_1_00
         1_00
@@ -371,8 +367,6 @@ class TestSystemNavigationAllCalls < Minitest::Test
   end
 
   def test_all_calls_on_from_100_float
-    skip
-
     test_class = Class.new do
       def test_all_calls_on_from_100_float
         1.00
