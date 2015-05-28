@@ -345,7 +345,9 @@ class SystemNavigation
   # @param message [Symbol] The name of the method you're interested in
   # @return [Array<UnboundMethod>] all methods that send +message
   def all_senders_of(message)
-    self.all_classes_and_modules.flat_map { |klass| klass.select_senders_of(of) }
+    self.all_classes_and_modules.flat_map do |klassmod|
+      klassmod.select_senders_of(message)
+    end
   end
 
   def all_sent_messages
