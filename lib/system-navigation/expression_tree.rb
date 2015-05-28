@@ -43,6 +43,10 @@ class SystemNavigation
           walk_node(n)
         when Symbol
           @keywords << node[i + 1] if n == :@kw
+
+          if n == :hash
+
+          end
         end
       end
     end

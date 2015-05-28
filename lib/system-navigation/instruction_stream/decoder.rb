@@ -48,7 +48,8 @@ class SystemNavigation
         self.select_instructions(method_name: name, literal: literal) do |_prev_prev, prev, instruction|
           if instruction.putobjects?(literal) ||
              instruction.putnils?(literal) ||
-             instruction.duparrays?(literal)
+             instruction.duparrays?(literal) ||
+             instruction.putstrings?(literal)
             next instruction
           end
         end

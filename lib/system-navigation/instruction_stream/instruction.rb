@@ -120,7 +120,14 @@ class SystemNavigation
       end
 
       def putstrings?(str)
-        !!(@opcode == 'putstring' && @operand.match(/".*#{str}.*"/))
+        return false unless @opcode == 'putstring'
+
+        s = str.inspect
+
+        return true if @operand == %|"#{s}"|
+        return true if @operand.match(/eval\(.*#{s}[^[\w;]].*\)/)
+
+        false
       end
 
       def putobjects?(str)

@@ -384,34 +384,31 @@ class TestSystemNavigationAllCalls < Minitest::Test
     assert_equal expected, @sn.all_calls(on: 1.00, from: test_class)
   end
 
-  def test_all_calls_on_from_100e
-    skip
-
+  def test_all_calls_on_from_200e
     test_class = Class.new do
-      def test_all_calls_on_from_100e
-        100e-2
+      def test_all_calls_on_from_200e
+        200e-2
       end
 
-      def test_all_calls_on_from_10_float
-        1.0
+      def test_all_calls_on_from_20_float
+        2.0
       end
 
-      def test_all_calls_on_from_100E
-        100e-2
+      def test_all_calls_on_from_200E
+        200E-2
       end
     end
 
     expected = [
-      test_class.instance_method(:test_all_calls_on_from_100e),
-      test_class.instance_method(:test_all_calls_on_from_100E,)
+      test_class.instance_method(:test_all_calls_on_from_200e),
+      test_class.instance_method(:test_all_calls_on_from_20_float),
+      test_class.instance_method(:test_all_calls_on_from_200E,)
     ]
 
-    assert_equal expected, @sn.all_calls(on: 100e-2, from: test_class)
+    assert_equal expected, @sn.all_calls(on: 200e-2, from: test_class)
   end
 
   def test_all_calls_on_from_0d170
-    skip
-
     test_class = Class.new do
       def test_all_calls_on_from_0d170
         0d170
@@ -431,8 +428,6 @@ class TestSystemNavigationAllCalls < Minitest::Test
   end
 
   def test_all_calls_on_from_0xaa
-    skip
-
     test_class = Class.new do
       def test_all_calls_on_from_0xaa
         0xaa
@@ -457,105 +452,105 @@ class TestSystemNavigationAllCalls < Minitest::Test
       def test_all_calls_on_from_0XaA
         0XaA
       end
-
-      expected = [
-        test_class.instance_method(:test_all_calls_on_from_0xaa),
-        test_class.instance_method(:test_all_calls_on_from_0xAa),
-        test_class.instance_method(:test_all_calls_on_from_0xAA),
-        test_class.instance_method(:test_all_calls_on_from_0Xaa),
-        test_class.instance_method(:test_all_calls_on_from_0XAa),
-        test_class.instance_method(:test_all_calls_on_from_0XaA)
-      ]
-
-      assert_equal expected, @sn.all_calls(on: 0xaa, from: test_class)
     end
 
-    def test_all_calls_on_from_string
-      skip
+    expected = [
+      test_class.instance_method(:test_all_calls_on_from_0xaa),
+      test_class.instance_method(:test_all_calls_on_from_0xAa),
+      test_class.instance_method(:test_all_calls_on_from_0xAA),
+      test_class.instance_method(:test_all_calls_on_from_0Xaa),
+      test_class.instance_method(:test_all_calls_on_from_0XAa),
+      test_class.instance_method(:test_all_calls_on_from_0XaA)
+    ]
 
-      test_class = Class.new do
-        def test_all_calls_on_from_string
-          "test_all_calls_on_from_string"
-        end
+    assert_equal expected, @sn.all_calls(on: 0xaa, from: test_class)
+  end
+
+
+  def test_all_calls_on_from_string
+    skip
+    test_class = Class.new do
+      def test_all_calls_on_from_string
+        "test_all_calls_on_from_string"
       end
-
-      expected = [
-        test_class.instance_method(:test_all_calls_on_from_string)
-      ]
-
-      assert_equal expected,
-                   @sn.all_calls(on: "test_all_calls_on_from_string",
-                                 from: test_class)
     end
 
-    def test_all_calls_on_from_hash
-      skip
+    expected = [
+      test_class.instance_method(:test_all_calls_on_from_string)
+    ]
 
-      test_class = Class.new do
-        def test_all_calls_on_from_hash
-          {1 => [:test_all_calls_on_from_hash]}
-        end
+    assert_equal expected,
+                 @sn.all_calls(on: "test_all_calls_on_from_string",
+                               from: test_class)
+  end
+
+  def test_all_calls_on_from_hash
+    skip
+
+    test_class = Class.new do
+      def test_all_calls_on_from_hash
+        {1 => [:test_all_calls_on_from_hash]}
       end
-
-      expected = [
-        test_class.instance_method(:test_all_calls_on_from_hash)
-      ]
-
-      assert_equal expected,
-                   @sn.all_calls(on: {1 => [:test_all_calls_on_from_hash]},
-                                 from: test_class)
     end
 
-    def test_all_calls_on_from_array
-      skip
+    expected = [
+      test_class.instance_method(:test_all_calls_on_from_hash)
+    ]
 
-      test_class = Class.new do
-        def test_all_calls_on_from_array
-          [1, :test_all_calls_on_from_array, 3.0]
-        end
+    assert_equal expected,
+                 @sn.all_calls(on: {1 => [:test_all_calls_on_from_hash]},
+                               from: test_class)
+  end
+
+  def test_all_calls_on_from_array
+    skip
+
+    test_class = Class.new do
+      def test_all_calls_on_from_array
+        [1, :test_all_calls_on_from_array, 3.0]
       end
-
-      expected = [
-        test_class.instance_method(:test_all_calls_on_from_array)
-      ]
-
-      assert_equal expected,
-                   @sn.all_calls(on: [1, :test_all_calls_on_from_array, 3.0],
-                                 from: test_class)
     end
 
-    def test_all_calls_on_from_range
-      skip
+    expected = [
+      test_class.instance_method(:test_all_calls_on_from_array)
+    ]
 
-      test_class = Class.new do
-        def test_all_calls_on_from_range
-          0...2.test_all_calls_on_from_range
-        end
+    assert_equal expected,
+                 @sn.all_calls(on: [1, :test_all_calls_on_from_array, 3.0],
+                               from: test_class)
+  end
+
+  def test_all_calls_on_from_range
+    skip
+
+    test_class = Class.new do
+      def test_all_calls_on_from_range
+        0...2.test_all_calls_on_from_range
       end
-
-      expected = [
-        test_class.instance_method(:test_all_calls_on_from_range)
-      ]
-
-      assert_equal expected, @sn.all_calls(on: 0...2, from: test_class)
     end
 
-    def test_all_calls_on_from_backticks
-      skip
+    expected = [
+      test_class.instance_method(:test_all_calls_on_from_range)
+    ]
 
-      test_class = Class.new do
-        def test_all_calls_on_from_backticks
-          `test_all_calls_on_from_backticks`
-        end
+    assert_equal expected, @sn.all_calls(on: 0...2, from: test_class)
+  end
+
+  def test_all_calls_on_from_backticks
+    skip
+
+    test_class = Class.new do
+      def test_all_calls_on_from_backticks
+        `test_all_calls_on_from_backticks`
       end
-
-      expected = [
-        test_class.instance_method(:test_all_calls_on_from_backticks)
-      ]
-
-      assert_equal expected,
-                   @sn.all_calls(on: `test_all_calls_on_from_backticks`,
-                                 from: test_class)
     end
+
+    expected = [
+      test_class.instance_method(:test_all_calls_on_from_backticks)
+    ]
+
+    assert_equal expected,
+                 @sn.all_calls(on: `test_all_calls_on_from_backticks`,
+                               from: test_class)
   end
 end
