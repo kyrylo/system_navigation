@@ -109,11 +109,10 @@ class SystemNavigation
       end
 
       def belongs_to?(gem_name)
-        gemspecs = Gem::Specification.find_all_by_name(gem_name)
-        return false if gemspecs.none? || gemspecs.count != 1
-        return false if self.own_selectors.empty?
+        gemspec = Gem::Specification.find_all_by_name(gem_name).last
 
-        gemspec = gemspecs.first
+        return false unless gemspec || self.own_selectors.empty?
+
         pattern = %r{(?:/gems/#{gem_name}-#{gemspec.version}/)|(?:/lib/ruby/[[0-9]\.]+/#{gem_name}/)}
         match_location = proc { |locations|
           !!locations.max_by { |_k, value| value }[0].match(pattern)
@@ -121,10 +120,9 @@ class SystemNavigation
 
         if self.contains_only_rb_methods?
           if self.all_neighbour_methods?
-            MethodQuery.execute(
-              collection: self.own_methods,
-              query: :all_belong_to_gem?,
-              pattern: pattern)
+            self.own_methods.as_array.all? do |method|
+              method.source_location.first.match(pattern)
+            end
           else
             grouped_locations = self.group_locations_by_path
 
@@ -147,9 +145,7 @@ class SystemNavigation
       end
 
       def contains_only_rb_methods?
-        MethodQuery.execute(
-          collection: self.own_methods,
-          query: :all_with_source_location?)
+        self.own_methods.as_array.all? { |method| method.source_location }
       end
 
       def all_neighbour_methods?
