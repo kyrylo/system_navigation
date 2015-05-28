@@ -58,8 +58,8 @@ class SystemNavigation
         end
       end
 
-      def self.scan_for_sent_messages(with:)
-        with.iseqs(nil).map do |instruction|
+      def scan_for_sent_messages
+        @scanner.iseqs(nil).map do |instruction|
           instruction.find_message
         end.compact
       end

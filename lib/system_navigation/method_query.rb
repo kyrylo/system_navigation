@@ -113,6 +113,15 @@ class SystemNavigation
       end
     end
 
+    def select_sent_messages
+      self.instance_and_singleton_do(
+        for_all: proc { |_scope, _selectors, method|
+          compiled_method = CompiledMethod.compile(method)
+          compiled_method.sent_messages.uniq.map(&:to_sym)
+        }
+      )
+    end
+
     protected
 
     def instance_and_singleton_do(for_instance: nil, for_singleton: nil, for_all: nil)

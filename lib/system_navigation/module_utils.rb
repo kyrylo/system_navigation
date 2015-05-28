@@ -1,8 +1,6 @@
 class SystemNavigation
   module ModuleUtils
     refine Module do
-      using UnboundMethodUtils
-
       def with_all_sub_and_superclasses
         Enumerator.new do |y|
           self.with_all_subclasses.each { |klass| y << klass }
@@ -194,9 +192,9 @@ class SystemNavigation
       end
 
       def all_messages
-        self.reachable_selectors.select do |selector|
-          self.instance_method(selector).sent_messages.uniq
-        end
+        MethodQuery.execute(
+          collection: self.own_methods,
+          query: :select_sent_messages)
       end
 
       def which_selectors_store_into(ivar)

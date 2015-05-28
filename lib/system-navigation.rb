@@ -4,7 +4,6 @@ require 'forwardable'
 require 'strscan'
 
 require_relative 'system_navigation/array_refinement'
-require_relative 'system_navigation/unbound_method_utils'
 require_relative 'system_navigation/module_utils'
 require_relative 'system_navigation/ruby_environment'
 require_relative 'system_navigation/instruction_stream'
@@ -350,9 +349,11 @@ class SystemNavigation
     end
   end
 
+  ##
+  #
   def all_sent_messages
     self.all_classes_and_modules.flat_map do |klassmod|
-      klassmod.all_messages
+      klassmod.all_messages.as_array
     end.uniq
   end
 end

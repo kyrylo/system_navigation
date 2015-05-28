@@ -143,6 +143,12 @@ class SystemNavigation
         @evaling_str ||= @operand.sub!(/\A"(.+)"/, '\1')
       end
 
+      def find_message
+        return unless sending?
+
+        @op_id
+      end
+
       private
 
       def sending?

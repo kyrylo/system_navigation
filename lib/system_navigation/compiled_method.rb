@@ -68,6 +68,16 @@ class SystemNavigation
       !self.c_method?
     end
 
+    def sent_messages
+      @decoder.scan_for_sent_messages
+    end
+
+    # @return [Array] of literals (as described in `doc/syntax/literals.rdoc`
+    #   in your Ruby installation) referenced by the receiver.
+    def literals
+
+    end
+
     protected
 
     def scan_for
