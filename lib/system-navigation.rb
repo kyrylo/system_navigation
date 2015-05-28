@@ -2,11 +2,13 @@ require 'method_source'
 
 require 'forwardable'
 require 'strscan'
+require 'ripper'
 
 require_relative 'system-navigation/array_refinement'
 require_relative 'system-navigation/module_refinement'
 require_relative 'system-navigation/ruby_environment'
 require_relative 'system-navigation/instruction_stream'
+require_relative 'system-navigation/expression_tree'
 require_relative 'system-navigation/method_query'
 require_relative 'system-navigation/compiled_method'
 require_relative 'system-navigation/method_hash'

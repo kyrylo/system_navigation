@@ -8,6 +8,18 @@ class SystemNavigation
       @method = method
       @scanner = SystemNavigation::InstructionStream.on(method)
       @decoder = InstructionStream::Decoder.new(@scanner)
+
+      begin
+        @source = @method.source
+      rescue MethodSource::SourceNotFoundError, NoMethodError, Errno::ENOTDIR
+        @source = ''
+      end
+
+      begin
+        @comment = @method.comment
+      rescue MethodSource::SourceNotFoundError, NoMethodError, Errno::ENOTDIR
+        @comment = ''
+      end
     end
 
     def compile
@@ -25,7 +37,8 @@ class SystemNavigation
     end
 
     def has_literal?(literal)
-      self.scan_for { @decoder.literal_scan(literal) }
+      self.scan_for { @decoder.literal_scan(literal) } ||
+        self.literals.include?(literal.inspect)
     end
 
     def reads_field?(ivar)
@@ -42,20 +55,7 @@ class SystemNavigation
 
     def source_contains?(string, match_case)
       string = string.dup
-
-      begin
-        source_code = self.source
-      rescue MethodSource::SourceNotFoundError, NoMethodError
-        source_code = ''
-      end
-
-      begin
-        source_comment = self.comment
-      rescue MethodSource::SourceNotFoundError, NoMethodError
-        source_comment = ''
-      end
-
-      code_and_comment = source_code + source_comment
+      code_and_comment = @source + @comment
       code_and_comment.downcase! && string.downcase! unless match_case
       !!code_and_comment.match(string)
     end
@@ -73,9 +73,11 @@ class SystemNavigation
     end
 
     # @return [Array] of literals (as described in `doc/syntax/literals.rdoc`
-    #   in your Ruby installation) referenced by the receiver.
+    #   in your Ruby installation minus procs) referenced by the receiver.
     def literals
-
+      return [] if self.c_method?
+      exptree = ExpressionTree.of(method: @method, with: @source)
+      exptree.keywords
     end
 
     protected

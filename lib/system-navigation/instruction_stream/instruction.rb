@@ -124,7 +124,17 @@ class SystemNavigation
       end
 
       def putobjects?(str)
-        !!(@opcode == 'putobject' && @operand.match(/(?::#{str}\z|\[.*:#{str},.*\])/))
+        return false unless @opcode == 'putobject'
+
+        return true if @operand.match(/(?::#{str}\z|\[.*:#{str},.*\])/)
+        return true if @operand == str.inspect
+
+        false
+      end
+
+      def putnils?(str)
+        return false unless @opcode == 'putnil'
+        @operand == str.inspect
       end
 
       def duparrays?(str)

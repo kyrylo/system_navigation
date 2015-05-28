@@ -46,7 +46,9 @@ class SystemNavigation
         name = @scanner.method.original_name
 
         self.select_instructions(method_name: name, literal: literal) do |_prev_prev, prev, instruction|
-          if instruction.putobjects?(literal) || instruction.duparrays?(literal)
+          if instruction.putobjects?(literal) ||
+             instruction.putnils?(literal) ||
+             instruction.duparrays?(literal)
             next instruction
           end
         end

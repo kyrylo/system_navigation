@@ -297,8 +297,6 @@ class TestSystemNavigationAllCalls < Minitest::Test
   end
 
   def test_all_calls_on_from_true
-    skip
-
     test_class = Class.new do
       def test_all_calls_on_from_true
         true
@@ -313,8 +311,6 @@ class TestSystemNavigationAllCalls < Minitest::Test
   end
 
   def test_all_calls_on_from_false
-    skip
-
     test_class = Class.new do
       def test_all_calls_on_from_false
         false
@@ -329,8 +325,6 @@ class TestSystemNavigationAllCalls < Minitest::Test
   end
 
   def test_all_calls_on_from_nil
-    skip
-
     test_class = Class.new do
       def test_all_calls_on_from_nil
         nil
