@@ -1,5 +1,5 @@
 class SystemNavigation
-  module ModuleUtils
+  module ModuleRefinement
     refine Module do
       def with_all_sub_and_superclasses
         Enumerator.new do |y|

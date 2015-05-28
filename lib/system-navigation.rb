@@ -4,7 +4,7 @@ require 'forwardable'
 require 'strscan'
 
 require_relative 'system-navigation/array_refinement'
-require_relative 'system-navigation/module_utils'
+require_relative 'system-navigation/module_refinement'
 require_relative 'system-navigation/ruby_environment'
 require_relative 'system-navigation/instruction_stream'
 require_relative 'system-navigation/method_query'
@@ -22,7 +22,7 @@ class SystemNavigation
   VERSION = File.exist?(VERSION_FILE) ?
               File.read(VERSION_FILE).chomp : '(could not find VERSION file)'
 
-  using ModuleUtils
+  using ModuleRefinement
 
   extend Forwardable
   def_delegators :@environment,
