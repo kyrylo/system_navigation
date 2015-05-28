@@ -350,7 +350,14 @@ class SystemNavigation
   end
 
   ##
+  # Get all messages that all methods send.
   #
+  # @example
+  #   sn.all_sent_messages
+  #   #=> [:name, :hash, ..., :type]
+  #
+  # @return [Array<Symbol>] all unique messages
+  # @note This is a very costly operation
   def all_sent_messages
     self.all_classes_and_modules.flat_map do |klassmod|
       klassmod.all_messages.as_array
