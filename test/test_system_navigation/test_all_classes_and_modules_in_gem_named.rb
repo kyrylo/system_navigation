@@ -1,4 +1,4 @@
-require_relative 'helper'
+require_relative '../helper'
 
 class TestSystemNavigationAllClassesAndModulesInGemNamed < Minitest::Test
   def setup

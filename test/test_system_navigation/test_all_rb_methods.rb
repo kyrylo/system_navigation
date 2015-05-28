@@ -1,4 +1,4 @@
-require_relative 'helper'
+require_relative '../helper'
 
 class TestSystemNavigationAllRbMethods < Minitest::Test
   def setup
