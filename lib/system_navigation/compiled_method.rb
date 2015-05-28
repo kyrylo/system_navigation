@@ -41,6 +41,8 @@ class SystemNavigation
     end
 
     def source_contains?(string, match_case)
+      string = string.dup
+
       begin
         source_code = self.source
       rescue MethodSource::SourceNotFoundError, NoMethodError

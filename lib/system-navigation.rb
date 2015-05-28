@@ -180,7 +180,8 @@ class SystemNavigation
   #   sn.all_classes_implementing(:~)
   #   #=> [Regexp, Bignum, Fixnum]
   #
-  # @param selector [Symbol] the name of the method to be searched for
+  # @!macro [new] selector.param
+  #   @param selector [Symbol] the name of the method to be searched for
   # @return [Array<Class>] classes that implement +selector+
   def all_classes_implementing(selector)
     self.all_classes.select { |klass| klass.includes_selector?(selector) }
@@ -193,36 +194,115 @@ class SystemNavigation
   #   sn.all_classes_implementing(:select)
   #   #=> [Enumerable, Kernel, #<Module:0x007f56daf92918>]
   #
-  # @param selector [Symbol] the name of the method to be searched for
+  # @!macro selector.param
   # @return [Array<Class>] modules that implement +selector+
   def all_modules_implementing(selector)
     self.all_modules.select { |mod| mod.includes_selector?(selector) }
   end
 
+  ##
+  # Query classes and modules for the methods they implement.
+  #
+  # @example
+  #   sn.all_implementors_of(:select)
+  #   #=> [Enumerator::Lazy, IO, ..., #<Class:Kernel>]
+  #
+  # @!macro selector.param
+  # @return [Array<Class, Module>] classes and modules that implement +selector+
   def all_implementors_of(selector)
-    self.all_behaviors.select { |klass| klass.includes_selector?(selector) }
-  end
-
-  def all_classes_in_gem_named(gem_name)
-    self.all_classes.select { |klass| klass.belongs_to?(gem_name) }
-  end
-
-  def all_modules_in_gem_named(gem_name)
-    self.all_modules.select { |klass| klass.belongs_to?(gem_name) }
-  end
-
-  def all_classes_and_modules_in_gem_named(gem_name)
     self.all_classes_and_modules.select do |klass|
-      klass.belongs_to?(gem_name)
+      klass.includes_selector?(selector)
     end
   end
 
-  def all_methods
-    self.all_behaviors.flat_map { |klass| klass.own_methods }
+  ##
+  # Query gems for classes they implement.
+  #
+  # @example
+  #   sn.all_classes_in_gem_named('system-navigation')
+  #   #=> [SystemNavigation::AncestorMethodFinder, ..., SystemNavigation]
+  #
+  # @!macro [new] gem.param
+  #   @param gem [String] The name of the gem. Case sensitive
+  # @return [Array<Class>] classes that were defined by +gem+
+  def all_classes_in_gem_named(gem)
+    self.all_classes.select { |klass| klass.belongs_to?(gem) }
   end
 
+  ##
+  # Query gems for modules they implement.
+  #
+  # @example
+  #   sn.all_modules_in_gem_named('pry-theme')
+  #   #=> [PryTheme::Theme::DefaultAttrs, ..., PryTheme]
+  #
+  # @!macro [new] gem.param
+  # @return [Array<Class>] modules that were defined by +gem+
+  def all_modules_in_gem_named(gem)
+    self.all_modules.select { |mod| mod.belongs_to?(gem) }
+  end
+
+  ##
+  # Query gems for classes and modules they implement.
+  #
+  # @example
+  #   sn.all_classes_and_modules_in_gem_named('pry-theme')
+  #   #=> [PryTheme::Preview, ..., PryTheme::Color256]
+  #
+  # @!macro [new] gem.param
+  # @return [Array<Class, Module>] classes and modules that were defined by
+  #   +gem+
+  def all_classes_and_modules_in_gem_named(gem)
+    self.all_classes_and_modules.select { |klassmod| klassmod.belongs_to?(gem) }
+  end
+
+  ##
+  # Get all methods defined in current Ruby process.
+  #
+  # @example
+  #   sn.all_methods
+  #   #=> [#<UnboundMethod: Gem::Dependency#name>, ...]
+  #
+  # @return [Array<UnboundMethod>] all methods that exist
+  def all_methods
+    self.all_classes_and_modules.map do |klass|
+      klass.own_methods.as_array
+    end.flatten
+  end
+
+  ##
+  # Search for a string in all classes and modules including their comments and
+  # names.
+  #
+  # @example
+  #   class A
+  #     def foo
+  #       :hello_hi
+  #     end
+  #   end
+  #
+  #   class B
+  #     def bar
+  #       'hello_hi'
+  #     end
+  #   end
+  #
+  #   module M
+  #     # hello_hi
+  #     def baz
+  #     end
+  #   end
+  #
+  #
+  # sn.all_methods_with_source(string: 'hello_hi')
+  # #=> [#<UnboundMethod: B#bar>, #<UnboundMethod: A#foo>, #<UnboundMethod: M#foo>]
+  #
+  # @param string [String] The string to be searched for
+  # @param match_case [Boolean] Whether to match case or not. Optional
+  # @return [Array<UnboundMethod>] methods that matched +string+
+  # @note This is a very costly operation
   def all_methods_with_source(string:, match_case: true)
-    self.all_behaviors.flat_map do |klass|
+    self.all_classes_and_modules.flat_map do |klass|
       klass.select_matching_methods(string, match_case)
     end
   end
