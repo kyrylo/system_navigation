@@ -44,11 +44,6 @@ class SystemNavigation
       ).as_array.uniq.count == 1
     end
 
-    def group_by_path
-      Hash[@collection.as_array.map { |m| m.source_location && m.source_location.first || nil }.
-            group_by(&:itself).map{ |k,v| [k, v.count] }.reject { |k, _v| k.nil? }]
-    end
-
     def find_accessing_methods(ivar:, only_set:, only_get:)
       self.instance_and_singleton_do(
         for_all: proc { |_scope, _selectors, method|
@@ -65,42 +60,6 @@ class SystemNavigation
           end
         }
       )
-    end
-
-    def select_where_source_contains(string:, match_case:)
-      @collection.as_array.select do |method|
-        compiled_method = CompiledMethod.compile(method)
-        if compiled_method.source_contains?(string, match_case)
-          compiled_method.unwrap
-        end
-      end
-    end
-
-    def select_senders_of(message:)
-      @collection.as_array.select do |method|
-        compiled_method = CompiledMethod.compile(method)
-        if compiled_method.sends_message?(message)
-          compiled_method.unwrap
-        end
-      end
-    end
-
-    def select_c_methods
-      @collection.as_array.select do |method|
-        compiled_method = CompiledMethod.compile(method)
-        if compiled_method.c_method?
-          compiled_method.unwrap
-        end
-      end
-    end
-
-    def select_rb_methods
-      @collection.as_array.select do |method|
-        compiled_method = CompiledMethod.compile(method)
-        if compiled_method.rb_method?
-          compiled_method.unwrap
-        end
-      end
     end
 
     def select_sent_messages

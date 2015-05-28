@@ -155,36 +155,49 @@ class SystemNavigation
       end
 
       def group_locations_by_path
-        MethodQuery.execute(
-          collection: self.own_methods,
-          query: :group_by_path)
+        Hash[
+          self.own_methods.as_array.map do |method|
+            method.source_location && method.source_location.first || nil
+          end.group_by(&:itself).map do |key, value|
+            [key, value.count]
+          end.reject { |k, _v| k.nil? }
+        ]
       end
 
       def select_matching_methods(string, match_case)
-        MethodQuery.execute(
-          collection: self.own_methods,
-          query: :select_where_source_contains,
-          string: string,
-          match_case: match_case)
+        self.own_methods.as_array.select do |method|
+          compiled_method = CompiledMethod.compile(method)
+          if compiled_method.source_contains?(string, match_case)
+            compiled_method.unwrap
+          end
+        end
       end
 
       def select_c_methods
-        MethodQuery.execute(
-          collection: self.own_methods,
-          query: :select_c_methods)
+        self.own_methods.as_array.select do |method|
+          compiled_method = CompiledMethod.compile(method)
+          if compiled_method.c_method?
+            compiled_method.unwrap
+          end
+        end
       end
 
       def select_rb_methods
-        MethodQuery.execute(
-          collection: self.own_methods,
-          query: :select_rb_methods)
+        self.own_methods.as_array.select do |method|
+          compiled_method = CompiledMethod.compile(method)
+          if compiled_method.rb_method?
+            compiled_method.unwrap
+          end
+        end
       end
 
       def select_senders_of(message)
-        MethodQuery.execute(
-          collection: self.own_methods,
-          query: :select_senders_of,
-          message: message)
+        self.own_methods.as_array.select do |method|
+          compiled_method = CompiledMethod.compile(method)
+          if compiled_method.sends_message?(message)
+            compiled_method.unwrap
+          end
+        end
       end
 
       def all_messages
