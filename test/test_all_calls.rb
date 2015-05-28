@@ -551,5 +551,23 @@ class TestSystemNavigationAllCalls < Minitest::Test
 
       assert_equal expected, @sn.all_calls(on: 0...2, from: test_class)
     end
+
+    def test_all_calls_on_from_backticks
+      skip
+
+      test_class = Class.new do
+        def test_all_calls_on_from_backticks
+          `test_all_calls_on_from_backticks`
+        end
+      end
+
+      expected = [
+        test_class.instance_method(:test_all_calls_on_from_backticks)
+      ]
+
+      assert_equal expected,
+                   @sn.all_calls(on: `test_all_calls_on_from_backticks`,
+                                 from: test_class)
+    end
   end
 end
