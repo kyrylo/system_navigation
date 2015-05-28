@@ -37,8 +37,13 @@ class SystemNavigation
     end
 
     def has_literal?(literal)
-      self.scan_for { @decoder.literal_scan(literal) } ||
-        self.literals.include?(literal.inspect)
+      case literal
+      when Hash
+        self.includes_hash?(literal)
+      else
+        self.scan_for { @decoder.literal_scan(literal) } ||
+          self.literals.include?(literal.inspect)
+      end
     end
 
     def reads_field?(ivar)
@@ -76,8 +81,16 @@ class SystemNavigation
     #   in your Ruby installation minus procs) referenced by the receiver.
     def literals
       return [] if self.c_method?
-      exptree = ExpressionTree.of(method: @method, with: @source)
+
+      exptree = ExpressionTree.of(method: @method, source: @source)
       exptree.keywords
+    end
+
+    def includes_hash?(hash)
+      return [] if self.c_method?
+
+      exptree = ExpressionTree.of(method: @method, source: @source)
+      exptree.includes_hash?(hash)
     end
 
     protected

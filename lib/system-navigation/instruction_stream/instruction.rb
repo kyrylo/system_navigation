@@ -124,7 +124,7 @@ class SystemNavigation
 
         s = str.inspect
 
-        return true if @operand == %|"#{s}"|
+        return true if @operand == s || @operand == %|"#{s}"|
         return true if @operand.match(/eval\(.*#{s}[^[\w;]].*\)/)
 
         false

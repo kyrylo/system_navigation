@@ -468,7 +468,6 @@ class TestSystemNavigationAllCalls < Minitest::Test
 
 
   def test_all_calls_on_from_string
-    skip
     test_class = Class.new do
       def test_all_calls_on_from_string
         "test_all_calls_on_from_string"
@@ -485,8 +484,6 @@ class TestSystemNavigationAllCalls < Minitest::Test
   end
 
   def test_all_calls_on_from_hash
-    skip
-
     test_class = Class.new do
       def test_all_calls_on_from_hash
         {1 => [:test_all_calls_on_from_hash]}

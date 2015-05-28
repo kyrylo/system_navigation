@@ -1,24 +1,28 @@
 class SystemNavigation
   class ExpressionTree
-    def self.of(method:, with:)
-      tree = self.new(method, with)
+    def self.of(method:, source:)
+      tree = self.new(method: method, source: source)
       tree.parse
       tree
     end
 
-    attr_reader :keywords
+    attr_reader :keywords, :hashes
 
-    def initialize(method, source)
+    def initialize(method: nil, source: nil)
       @method = method
       @source = source
       @keywords = []
+      @hashes = []
+      @tree = nil
     end
 
     def parse
-      parsed = Ripper.sexp(@source)
-      return false unless parsed
+      return false if [@method, @source].compact.empty?
 
-      parsed = parsed[1][0]
+      @tree = Ripper.sexp(@source)
+      return false unless @tree
+
+      parsed = @tree[1][0]
       return false unless parsed.first == :def
 
       method_body_tree = parsed[3][1]
@@ -28,7 +32,37 @@ class SystemNavigation
       true
     end
 
+    def includes_hash?(hash_obj)
+      built = Ripper.sexp(hash_obj.inspect)
+
+      built_hash = built[1][0][1]
+
+      includes = @hashes.find do |hash|
+        hash = hash[1]
+
+        unify(hash)
+        unify(built_hash)
+
+        hash == built_hash
+      end
+
+      !!includes
+    end
+
     protected
+
+    def unify(node)
+      node.each do |n|
+        if n.instance_of?(Array)
+          if n.size == 2 && n.all? { |num| num.instance_of?(Fixnum) }
+            n[0] = 0
+            n[1] = 0
+          end
+
+          unify(n)
+        end
+      end
+    end
 
     def walk(tree)
       tree.each do |node|
@@ -43,10 +77,7 @@ class SystemNavigation
           walk_node(n)
         when Symbol
           @keywords << node[i + 1] if n == :@kw
-
-          if n == :hash
-
-          end
+          @hashes << node if n == :hash
         end
       end
     end
