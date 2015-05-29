@@ -500,8 +500,6 @@ class TestSystemNavigationAllCalls < Minitest::Test
   end
 
   def test_all_calls_on_from_array
-    skip
-
     test_class = Class.new do
       def test_all_calls_on_from_array
         [1, :test_all_calls_on_from_array, 3.0]

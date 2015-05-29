@@ -40,6 +40,8 @@ class SystemNavigation
       case literal
       when Hash
         self.includes_hash?(literal)
+      when Array
+        self.includes_array?(literal)
       else
         self.scan_for { @decoder.literal_scan(literal) } ||
           self.literals.include?(literal.inspect)
@@ -91,6 +93,13 @@ class SystemNavigation
 
       exptree = ExpressionTree.of(method: @method, source: @source)
       exptree.includes_hash?(hash)
+    end
+
+    def includes_array?(array)
+      return [] if self.c_method?
+
+      exptree = ExpressionTree.of(method: @method, source: @source)
+      exptree.includes_array?(array)
     end
 
     protected

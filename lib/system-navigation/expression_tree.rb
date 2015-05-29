@@ -13,6 +13,7 @@ class SystemNavigation
       @source = source
       @keywords = []
       @hashes = []
+      @arrays = []
       @tree = nil
     end
 
@@ -49,6 +50,22 @@ class SystemNavigation
       !!includes
     end
 
+    def includes_array?(array_obj)
+      built = Ripper.sexp(array_obj.inspect)
+
+      built_array = built[1][0][1]
+      includes = @arrays.find do |array|
+        array = array[1]
+
+        unify(array)
+        unify(built_array)
+
+        array == built_array
+      end
+
+      !!includes
+    end
+
     protected
 
     def unify(node)
@@ -78,6 +95,7 @@ class SystemNavigation
         when Symbol
           @keywords << node[i + 1] if n == :@kw
           @hashes << node if n == :hash
+          @arrays << node if n == :array
         end
       end
     end
