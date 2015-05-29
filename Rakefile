@@ -5,3 +5,8 @@ Rake::TestTask.new do |t|
 end
 
 task default: :test
+
+desc 'Run all benchmarks'
+task :bm do
+  system 'ruby benchmarks/**.rb'
+end
