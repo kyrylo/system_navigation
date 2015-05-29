@@ -1,3 +1,6 @@
+require 'system_navigation'
+require 'system_navigation/method_source_code'
+
 require 'method_source'
 
 require 'forwardable'

@@ -1,5 +1,7 @@
 class SystemNavigation
   class CompiledMethod
+    include SystemNavigation::MethodSourceCode::MethodExtensions
+
     def self.compile(method)
       self.new(method).compile
     end
