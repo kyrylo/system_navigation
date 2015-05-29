@@ -515,17 +515,31 @@ class TestSystemNavigationAllCalls < Minitest::Test
                                from: test_class)
   end
 
-  def test_all_calls_on_from_range
-    skip
-
+  def test_all_calls_on_from_range_dot_2
     test_class = Class.new do
-      def test_all_calls_on_from_range
-        0...2.test_all_calls_on_from_range
+      def test_all_calls_on_from_range_dot_2
+        0..3.test_all_calls_on_from_range_dot_2
       end
     end
 
     expected = [
-      test_class.instance_method(:test_all_calls_on_from_range)
+      test_class.instance_method(:test_all_calls_on_from_range_dot_2)
+    ]
+
+    assert_equal expected, @sn.all_calls(on: 0..3, from: test_class)
+  end
+
+
+
+  def test_all_calls_on_from_range_dot_3
+    test_class = Class.new do
+      def test_all_calls_on_from_range_dot_3
+        0...2.test_all_calls_on_from_range_dot_3
+      end
+    end
+
+    expected = [
+      test_class.instance_method(:test_all_calls_on_from_range_dot_3)
     ]
 
     assert_equal expected, @sn.all_calls(on: 0...2, from: test_class)

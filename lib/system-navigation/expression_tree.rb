@@ -12,6 +12,7 @@ class SystemNavigation
       @keywords = []
       @hashes = []
       @arrays = []
+      @ranges = []
       @tree = nil
     end
 
@@ -38,6 +39,7 @@ class SystemNavigation
       collection = case obj
                    when Array then @arrays
                    when Hash then @hashes
+                   when Range then @ranges
                    else
                      []
                    end
@@ -85,6 +87,7 @@ class SystemNavigation
           @keywords << node[i + 1] if n == :@kw
           @hashes << node if n == :hash
           @arrays << node if n == :array
+          @ranges << node if n == :dot2 || n == :dot3
         end
       end
     end
