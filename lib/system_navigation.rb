@@ -102,7 +102,7 @@ class SystemNavigation
       fail ArgumentError, 'both only_get and only_set were provided'
     end
 
-    if from && from.instance_of?(Class)
+    if from && !from.instance_of?(Class)
       fail TypeError, "from must be a Class (#{from.class} given)"
     end
 
