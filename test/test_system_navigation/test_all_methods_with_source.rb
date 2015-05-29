@@ -71,4 +71,8 @@ class TestSystemNavigationAllMethodsWithSource < Minitest::Test
     string = 'test_all_methods_with_source_comment_comment'
     assert_equal expected, @sn.all_methods_with_source(string: string)
   end
+
+  def test_all_methods_with_source_empty
+    assert_equal [], @sn.all_methods_with_source(string: '')
+  end
 end

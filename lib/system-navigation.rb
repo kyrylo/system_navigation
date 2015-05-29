@@ -303,6 +303,8 @@ class SystemNavigation
   # @return [Array<UnboundMethod>] methods that matched +string+
   # @note This is a very costly operation
   def all_methods_with_source(string:, match_case: true)
+    return [] if string.empty?
+
     self.all_classes_and_modules.flat_map do |klassmod|
       klassmod.select_matching_methods(string, match_case)
     end
