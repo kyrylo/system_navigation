@@ -6,8 +6,6 @@ class SystemNavigation
       tree
     end
 
-    attr_reader :keywords, :hashes
-
     def initialize(method: nil, source: nil)
       @method = method
       @source = source
@@ -33,40 +31,31 @@ class SystemNavigation
       true
     end
 
-    def includes_hash?(hash_obj)
-      built = Ripper.sexp(hash_obj.inspect)
+    def includes?(obj)
+      built = Ripper.sexp(obj.inspect)
+      built_obj = built[1][0][1]
 
-      built_hash = built[1][0][1]
-
-      includes = @hashes.find do |hash|
-        hash = hash[1]
-
-        unify(hash)
-        unify(built_hash)
-
-        hash == built_hash
-      end
-
-      !!includes
-    end
-
-    def includes_array?(array_obj)
-      built = Ripper.sexp(array_obj.inspect)
-
-      built_array = built[1][0][1]
-      includes = @arrays.find do |array|
-        array = array[1]
-
-        unify(array)
-        unify(built_array)
-
-        array == built_array
-      end
-
-      !!includes
+      collection = case obj
+                   when Array then @arrays
+                   when Hash then @hashes
+                   else
+                     []
+                   end
+      !!find_includes(collection, built_obj) || @keywords.include?(obj.inspect)
     end
 
     protected
+
+    def find_includes(collection, obj)
+      collection.find do |item|
+        item = item[1]
+
+        unify(item)
+        unify(obj)
+
+        item == obj
+      end
+    end
 
     def unify(node)
       node.each do |n|

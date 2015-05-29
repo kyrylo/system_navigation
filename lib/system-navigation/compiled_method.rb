@@ -36,16 +36,14 @@ class SystemNavigation
       @method
     end
 
+    # Literals that are referenced by the receiver as described in
+    # `doc/syntax/literals.rdoc` in your Ruby, installation minus procs.
     def has_literal?(literal)
-      case literal
-      when Hash
-        self.includes_hash?(literal)
-      when Array
-        self.includes_array?(literal)
-      else
-        self.scan_for { @decoder.literal_scan(literal) } ||
-          self.literals.include?(literal.inspect)
-      end
+      return true if self.scan_for { @decoder.literal_scan(literal) }
+      return false if self.c_method?
+
+      exptree = ExpressionTree.of(method: @method, source: @source)
+      exptree.includes?(literal)
     end
 
     def reads_field?(ivar)
@@ -79,33 +77,17 @@ class SystemNavigation
       @decoder.scan_for_sent_messages
     end
 
-    # @return [Array] of literals (as described in `doc/syntax/literals.rdoc`
-    #   in your Ruby installation minus procs) referenced by the receiver.
-    def literals
-      return [] if self.c_method?
-
-      exptree = ExpressionTree.of(method: @method, source: @source)
-      exptree.keywords
-    end
-
-    def includes_hash?(hash)
-      return [] if self.c_method?
-
-      exptree = ExpressionTree.of(method: @method, source: @source)
-      exptree.includes_hash?(hash)
-    end
-
-    def includes_array?(array)
-      return [] if self.c_method?
-
-      exptree = ExpressionTree.of(method: @method, source: @source)
-      exptree.includes_array?(array)
-    end
-
     protected
 
     def scan_for
       @scanner.scan_for(yield)
+    end
+
+    def scan_for_literal(literal)
+      return false if self.c_method?
+
+      exptree = ExpressionTree.of(method: @method, source: @source)
+      exptree.includes?(literal)
     end
   end
 end
