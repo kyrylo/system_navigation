@@ -6,6 +6,6 @@ class TestSystemNavigationAllCMethods < Minitest::Test
   end
 
   def test_all_c_methods
-    skip 'https://github.com/pry/pry-doc/tree/master/spec'
+    assert @sn.all_c_methods.include?(Sample.instance_method(:c_method))
   end
 end
