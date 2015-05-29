@@ -3,14 +3,14 @@ API
 
 This file _might_ be out of date. The best reference is the unit tests of this
 project. The detailed description of parameters can be found in
-`./lib/system-navigation.rb`.
+`./lib/system_navigation.rb`.
 
 ## Description
 
 Create a new instance of SystemNavigation.
 
 ```ruby
-require 'system-navigation'
+require 'system_navigation'
 
 sn = SystemNavigation.default
 ```

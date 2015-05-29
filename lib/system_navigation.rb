@@ -4,18 +4,18 @@ require 'forwardable'
 require 'strscan'
 require 'ripper'
 
-require_relative 'system-navigation/array_refinement'
-require_relative 'system-navigation/module_refinement'
-require_relative 'system-navigation/ruby_environment'
-require_relative 'system-navigation/instruction_stream'
-require_relative 'system-navigation/expression_tree'
-require_relative 'system-navigation/method_query'
-require_relative 'system-navigation/compiled_method'
-require_relative 'system-navigation/method_hash'
-require_relative 'system-navigation/ancestor_method_finder'
-require_relative 'system-navigation/instruction_stream/decoder'
-require_relative 'system-navigation/instruction_stream/instruction'
-require_relative 'system-navigation/instruction_stream/instruction/attr_instruction'
+require_relative 'system_navigation/array_refinement'
+require_relative 'system_navigation/module_refinement'
+require_relative 'system_navigation/ruby_environment'
+require_relative 'system_navigation/instruction_stream'
+require_relative 'system_navigation/expression_tree'
+require_relative 'system_navigation/method_query'
+require_relative 'system_navigation/compiled_method'
+require_relative 'system_navigation/method_hash'
+require_relative 'system_navigation/ancestor_method_finder'
+require_relative 'system_navigation/instruction_stream/decoder'
+require_relative 'system_navigation/instruction_stream/instruction'
+require_relative 'system_navigation/instruction_stream/instruction/attr_instruction'
 
 class SystemNavigation
   # The VERSION file must be in the root directory of the library.
@@ -147,7 +147,7 @@ class SystemNavigation
   #   #=> [#<UnboundMethod: A#foo>]
   #
   # @example Gem
-  #   sn.all_calls(on: :singleton, gem: 'system-navigation')
+  #   sn.all_calls(on: :singleton, gem: 'system_navigation')
   #   #=> [...]
   #
   # @param on [Boolean, Integer, Float, String, Symbol, Array, Hash, Range,
@@ -224,7 +224,7 @@ class SystemNavigation
   # Query gems for classes they implement.
   #
   # @example
-  #   sn.all_classes_in_gem_named('system-navigation')
+  #   sn.all_classes_in_gem_named('system_navigation')
   #   #=> [SystemNavigation::AncestorMethodFinder, ..., SystemNavigation]
   #
   # @!macro [new] gem.param

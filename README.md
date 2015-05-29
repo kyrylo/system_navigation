@@ -1,7 +1,7 @@
 SystemNavigation
 ==
 
-* Repository: [https://github.com/kyrylo/system-navigation/](https://github.com/kyrylo/system-navigation/)
+* Repository: [https://github.com/kyrylo/system_navigation/](https://github.com/kyrylo/system_navigation/)
 
 Description
 -----------
@@ -42,7 +42,7 @@ Installation
 
 All you need is to install the gem.
 
-    gem install system-navigation
+    gem install system_navigation
 
 Synopsis
 ---

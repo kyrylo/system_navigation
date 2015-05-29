@@ -1,12 +1,12 @@
 Gem::Specification.new do |s|
-  s.name         = 'system-navigation'
+  s.name         = 'system_navigation'
   s.version      = File.read('VERSION')
   s.date         = Time.now.strftime('%Y-%m-%d')
   s.summary      = ''
   s.description  = ''
   s.author       = 'Kyrylo Silin'
   s.email        = 'silin@kyrylo.org'
-  s.homepage     = 'https://github.com/kyrylo/system-navigation'
+  s.homepage     = 'https://github.com/kyrylo/system_navigation'
   s.licenses     = 'MIT'
 
   s.require_path = 'lib'

@@ -1,6 +1,6 @@
 require 'minitest/autorun'
 require 'pry'
-require 'system-navigation'
+require 'system_navigation'
 
 require_relative './assertions'
 

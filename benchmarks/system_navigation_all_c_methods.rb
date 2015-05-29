@@ -1,6 +1,6 @@
 require 'benchmark'
 
-require_relative '../lib/system-navigation'
+require_relative '../lib/system_navigation'
 
 =begin
 Rehearsal --------------------------------------------------

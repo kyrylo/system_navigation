@@ -1,6 +1,6 @@
 require 'rubyprof'
 
-require_relative '../lib/system-navigation'
+require_relative '../lib/system_navigation'
 
 sn = SystemNavigation.default
 
