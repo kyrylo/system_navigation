@@ -37,7 +37,8 @@ class SystemNavigation
     end
 
     # Literals that are referenced by the receiver as described in
-    # `doc/syntax/literals.rdoc` in your Ruby, installation minus procs.
+    # `doc/syntax/literals.rdoc` in your Ruby, installation minus procs and
+    # backticks.
     def has_literal?(literal)
       return true if self.scan_for { @decoder.literal_scan(literal) }
       return false if self.c_method?
