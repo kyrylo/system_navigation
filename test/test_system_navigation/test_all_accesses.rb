@@ -632,4 +632,13 @@ class TestSystemNavigationAllCalls < Minitest::Test
       @sn.all_accesses(to: :@foo, from: Class.new, only_set: true, only_get: true)
     end
   end
+
+  def test_all_accesses_to_from_module
+    test_module = Module.new
+
+    assert_raises(TypeError) do
+      @sn.all_accesses(to: :@test_all_accesses_to_from_module,
+                       from: test_module)
+    end
+  end
 end

@@ -86,9 +86,9 @@ class SystemNavigation
   #   #=> [#<UnboundMethod: B#foo>]
   #
   # @param to [Symbol] The name of the instance variable to search for
-  # @param from [Class, Module] The behaviour that limits the scope of the
-  #   query. Optional. If omitted, performs the query starting from the top of
-  #   the object hierarchy (BasicObject)
+  # @param from [Class] The class that limits the scope of the query. Optional.
+  #   If omitted, performs the query starting from the top of the object
+  #   hierarchy (BasicObject)
   # @param only_get [Boolean] Limits the scope of the query only to methods that
   #   write into the +ivar+. Optional. Mutually exclusive with +only_set+
   # @param only_set [Boolean] Limits the scope of the query only to methods that
@@ -100,6 +100,10 @@ class SystemNavigation
   def all_accesses(to:, from: nil, only_get: nil, only_set: nil)
     if only_set && only_get
       fail ArgumentError, 'both only_get and only_set were provided'
+    end
+
+    unless from.instance_of?(Class)
+      fail TypeError, 'from must be a Class'
     end
 
     (from || BasicObject).with_all_sub_and_superclasses.flat_map do |klass|
