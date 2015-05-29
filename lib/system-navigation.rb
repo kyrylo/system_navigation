@@ -103,7 +103,7 @@ class SystemNavigation
     end
 
     unless from.instance_of?(Class)
-      fail TypeError, 'from must be a Class'
+      fail TypeError, "from must be a Class (#{from.class} given)"
     end
 
     (from || BasicObject).with_all_sub_and_superclasses.flat_map do |klass|
