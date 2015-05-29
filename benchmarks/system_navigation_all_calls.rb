@@ -16,7 +16,6 @@ Rehearsal ---------------------------------------------------
 #all_calls - 10  26.330000   0.010000  26.340000 ( 26.341292)
 #all_calls - 20  51.340000   0.050000  51.390000 ( 51.348082)
 ruby benchmarks/system_navigation_all_calls.rb  189.75s user 0.18s system 100% cpu 3:09.86 total
-
 =end
 
 sn = SystemNavigation.default
@@ -42,8 +41,6 @@ class B
     :hello
   end
 end
-
-
 
 Benchmark.bmbm do |bm|
   bm.report('#all_calls - 1') do
