@@ -4,18 +4,19 @@ require_relative '../lib/system-navigation'
 
 =begin
 Rehearsal ---------------------------------------------------
-#all_calls - 1    0.440000   0.000000   0.440000 (  0.442937)
-#all_calls - 5    1.160000   0.000000   1.160000 (  1.155018)
-#all_calls - 10   1.840000   0.000000   1.840000 (  1.858812)
-#all_calls - 20   1.840000   0.000000   1.840000 (  1.861349)
------------------------------------------- total: 5.280000sec
+#all_calls - 1    2.490000   0.010000   2.500000 (  2.498720)
+#all_calls - 5   12.900000   0.010000  12.910000 ( 12.892300)
+#all_calls - 10  27.330000   0.020000  27.350000 ( 27.342593)
+#all_calls - 20  52.830000   0.030000  52.860000 ( 52.834644)
+----------------------------------------- total: 95.620000sec
 
                       user     system      total        real
-#all_calls - 1    0.420000   0.000000   0.420000 (  0.424548)
-#all_calls - 5    1.100000   0.000000   1.100000 (  1.097924)
-#all_calls - 10   1.840000   0.000000   1.840000 (  1.834041)
-#all_calls - 20   1.860000   0.000000   1.860000 (  1.854899)
-ruby benchmarks/system_navigation_all_calls.rb  10.55s user 0.01s system 99% cpu 10.608 total
+#all_calls - 1    2.630000   0.010000   2.640000 (  2.634253)
+#all_calls - 5   13.780000   0.010000  13.790000 ( 13.807633)
+#all_calls - 10  26.330000   0.010000  26.340000 ( 26.341292)
+#all_calls - 20  51.340000   0.050000  51.390000 ( 51.348082)
+ruby benchmarks/system_navigation_all_calls.rb  189.75s user 0.18s system 100% cpu 3:09.86 total
+
 =end
 
 sn = SystemNavigation.default
@@ -52,19 +53,19 @@ Benchmark.bmbm do |bm|
   end
 
   bm.report('#all_calls - 5') do
-    3.times do
+    5.times do
       sn.all_calls(on: :hello)
     end
   end
 
   bm.report('#all_calls - 10') do
-    5.times do
+    10.times do
       sn.all_calls(on: :hello)
     end
   end
 
   bm.report('#all_calls - 20') do
-    5.times do
+    20.times do
       sn.all_calls(on: :hello)
     end
   end
