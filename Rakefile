@@ -23,7 +23,7 @@ task :gem do
 end
 
 task :clean do
-  system 'rm -rf tmp && rm -rf pkg'
+  system 'rm -rf tmp'
 end
 
 task :req => [:clean, :compile, :gem, :install] do
