@@ -1,5 +1,12 @@
 require 'rake/testtask'
 require 'rake/extensiontask'
+require 'rake/clean'
+
+dlext = RbConfig::CONFIG['DLEXT']
+
+CLEAN.include("ext/**/*.#{dlext}", "ext/**/*.log", "ext/**/*.o",
+              "ext/**/*~", "ext/**/*#*", "ext/**/*.obj", "**/*#*", "**/*#*.*",
+              "ext/**/*.def", "ext/**/*.pdb", "**/*_flymake*.*", "**/*_flymake", "**/*.rbc")
 
 Rake::ExtensionTask.new do |ext|
   ext.name    = 'method_source_code'
@@ -22,11 +29,16 @@ task :gem do
   system 'gem build system_navigation*.gemspec'
 end
 
-task :clean do
+task :cleanup do
   system 'rm -rf tmp'
+  system 'rm -rf lib/system_navigation/method_source_code.so'
 end
 
-task :req => [:clean, :compile, :gem, :install] do
+task :uninstall do
+  system 'gem uninstall system_navigation'
+end
+
+task :req => [:uninstall, :cleanup, :compile, :gem, :install] do
   system 'pry -rsystem_navigation'
 end
 

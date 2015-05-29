@@ -1,5 +1,4 @@
 #include <ruby.h>
-#include <stdio.h>
 
 static VALUE
 mMethodExtensions_source(VALUE self)
