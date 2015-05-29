@@ -125,6 +125,7 @@ class SystemNavigation
             end
           else
             grouped_locations = self.group_locations_by_path
+            return false if grouped_locations.empty?
 
             if grouped_locations.all? { |l| l[0].match(pattern) }
               true
@@ -133,7 +134,7 @@ class SystemNavigation
             end
           end
         else
-          grouped_locations = grouped_locations = self.group_locations_by_path
+          grouped_locations = self.group_locations_by_path
           grouped_locations.delete_if { |k, v| k.nil? }
 
           if grouped_locations.empty?

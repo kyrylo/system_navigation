@@ -6,8 +6,6 @@ class TestSystemNavigationAllModulesInGemNamed < Minitest::Test
   end
 
   def test_all_modules_in_gem_named
-    skip
-
     mods = @sn.all_modules_in_gem_named('minitest')
 
     refute_empty mods

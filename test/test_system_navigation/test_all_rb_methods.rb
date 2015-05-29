@@ -6,6 +6,6 @@ class TestSystemNavigationAllRbMethods < Minitest::Test
   end
 
   def test_all_rb_methods
-    skip
+    assert @sn.all_rb_methods.include?(Sample.instance_method(:rb_method))
   end
 end

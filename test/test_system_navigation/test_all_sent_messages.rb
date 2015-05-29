@@ -6,6 +6,12 @@ class TestSystemNavigationAllSentMessages < Minitest::Test
   end
 
   def test_all_sent_messages
-    skip
+    _test_class = Class.new do
+      def test_all_sent_messagses
+        self.test_all_sent_messages
+      end
+    end
+
+    assert @sn.all_sent_messages.include?(:test_all_sent_messages)
   end
 end
