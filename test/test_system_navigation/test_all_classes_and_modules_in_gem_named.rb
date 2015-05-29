@@ -14,4 +14,10 @@ class TestSystemNavigationAllClassesAndModulesInGemNamed < Minitest::Test
       assert_kind_of Module, klassmod
     end
   end
+
+  def test_all_classes_and_modules_in_gem_named_bad_argument
+    mods = @sn.all_classes_and_modules_in_gem_named('mi')
+
+    assert_empty mods
+  end
 end

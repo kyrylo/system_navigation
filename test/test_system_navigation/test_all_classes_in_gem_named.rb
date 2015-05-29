@@ -14,4 +14,10 @@ class TestSystemNavigationAllClassesInGemNamed < Minitest::Test
       assert_instance_of Class, klass
     end
   end
+
+  def test_all_classes_in_gem_named_bad_argument
+    klasses = @sn.all_classes_in_gem_named('mi')
+
+    assert_empty klasses
+  end
 end
