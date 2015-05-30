@@ -1,6 +1,6 @@
 #include <ruby.h>
 
-static VALUE eSourceNotFoundError;
+static VALUE rb_eSourceNotFoundError;
 
 static VALUE
 lines_for(VALUE file)
@@ -9,7 +9,7 @@ lines_for(VALUE file)
 }
 
 static VALUE
-mMethodExtensions_source(VALUE self)
+source(VALUE self)
 {
     VALUE method, source_location, name, file, line;
 
@@ -18,7 +18,7 @@ mMethodExtensions_source(VALUE self)
     name = rb_funcall(method, rb_intern("name"), 0);
 
     if (NIL_P(source_location)) {
-        rb_raise(eSourceNotFoundError, "Could not locate source for %s!",
+        rb_raise(rb_eSourceNotFoundError, "Could not locate source for %s!",
 		 RSTRING_PTR(rb_sym2str(name)));
     }
 
@@ -31,16 +31,17 @@ mMethodExtensions_source(VALUE self)
 
 void Init_method_source_code(void)
 {
-    VALUE cSystemNavigation, mMethodSourceCode, mMethodExtensions;
+    VALUE rb_cSystemNavigation, rb_mMethodSourceCode, rb_mMethodExtensions;
 
-    cSystemNavigation = rb_define_class("SystemNavigation", rb_cObject);
-    mMethodSourceCode = rb_define_module_under(cSystemNavigation, "MethodSourceCode");
+    rb_cSystemNavigation = rb_define_class("SystemNavigation", rb_cObject);
+    rb_mMethodSourceCode = rb_define_module_under(rb_cSystemNavigation,
+						  "MethodSourceCode");
 
-    eSourceNotFoundError = rb_define_class_under(mMethodSourceCode,
-						 "SourceNotFoundError",
-						 rb_eStandardError);
+    rb_eSourceNotFoundError = rb_define_class_under(rb_mMethodSourceCode,
+						    "SourceNotFoundError",
+						    rb_eStandardError);
 
-    mMethodExtensions = rb_define_module_under(mMethodSourceCode, "MethodExtensions");
+    rb_mMethodExtensions = rb_define_module_under(rb_mMethodSourceCode, "MethodExtensions");
 
-    rb_define_method(mMethodExtensions, "source", mMethodExtensions_source, 0);
+    rb_define_method(rb_mMethodExtensions, "source", source, 0);
 }
