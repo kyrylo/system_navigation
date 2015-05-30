@@ -14,12 +14,6 @@ Rake::ExtensionTask.new do |ext|
   ext.lib_dir = 'lib/system_navigation'
 end
 
-Rake::TestTask.new do |t|
-  t.test_files = Dir.glob('test/**/test_*.rb')
-end
-
-task default: :test
-
 desc 'Run all benchmarks'
 task :bm do
   system 'ruby benchmarks/**.rb'
@@ -45,3 +39,11 @@ end
 task :install do
   system 'gem install system_navigation*.gem'
 end
+
+task :test => [:compile] do
+  Rake::TestTask.new do |t|
+    t.test_files = Dir.glob('test/**/test_*.rb')
+  end
+end
+
+task default: :test
