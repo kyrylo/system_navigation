@@ -1,12 +1,10 @@
-require 'system_navigation'
-require 'system_navigation/method_source_code'
-
 require 'method_source'
 
 require 'forwardable'
 require 'strscan'
 require 'ripper'
 
+require 'system_navigation/method_source_code'
 require_relative 'system_navigation/array_refinement'
 require_relative 'system_navigation/module_refinement'
 require_relative 'system_navigation/ruby_environment'
