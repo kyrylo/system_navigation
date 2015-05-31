@@ -23,20 +23,22 @@ find_relevant_lines(char *lines[], char *relevant_lines[],
 static int
 read_lines(const char *filename, char *lines[])
 {
-    FILE *fp = fopen(filename, "r");
+    FILE *fp;
+    ssize_t read;
+    char *line = NULL;
+    size_t len = 0;
+    int line_count = 0;
+
+    fp = fopen(filename, "r");
     if (fp == NULL) {
         rb_raise(rb_eIOError, "No such file or directory - %s", filename);
     }
 
-    ssize_t read;
-    char *cur_line = NULL;
-    size_t cur_line_len = 0;
-    int line_count = 0;
-    while ((read = getline(&cur_line, &cur_line_len, fp)) != -1) {
-        strcpy(lines[line_count++], cur_line);
+    while ((read = getline(&line, &len, fp)) != -1) {
+        strncpy(lines[line_count++], line, read);
     }
 
-    free(cur_line);
+    free(line);
     fclose(fp);
 
     return line_count;
