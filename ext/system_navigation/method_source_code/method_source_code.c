@@ -4,7 +4,6 @@
 
 #define MAXLINES 1000
 #define MAXLINELEN 300
-#define PARSE_EXPR(parser, str)
 
 static VALUE rb_eSourceNotFoundError;
 
