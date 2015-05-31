@@ -74,27 +74,27 @@ sexp_builder(void)
 static char *
 extract_first_expression(char *lines[], const int linect)
 {
-	char *expr = malloc(linect * MAXLINELEN);
+    char *expr = malloc(linect * MAXLINELEN);
 
-	expr[0] = '\0';
-	for (int i = 0; i < linect; i++) {
-		strcat(expr, lines[i]);
-		if (is_complete_expression(expr)) {
-			return expr;
-		}
-	}
+    expr[0] = '\0';
+    for (int i = 0; i < linect; i++) {
+        strcat(expr, lines[i]);
+        if (is_complete_expression(expr)) {
+            return expr;
+        }
+    }
 
-	return NULL;
+    return NULL;
 }
 
 static int
 is_complete_expression(char *expr)
 {
-	if (parse_expr(expr) != Qnil) {
-		return 1;
-	} else {
-		return 0;
-	}
+    if (parse_expr(expr) != Qnil) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 static VALUE
