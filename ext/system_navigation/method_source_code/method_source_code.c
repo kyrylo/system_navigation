@@ -56,7 +56,7 @@ allocate_lines(const int maxlines) {
     }
 
     for (int i = 0; i < maxlines; i++) {
-        lines[i] = malloc(sizeof(char) * MAXLINELEN);
+        lines[i] = malloc(MAXLINELEN);
     }
 
     return lines;
