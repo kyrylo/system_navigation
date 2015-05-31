@@ -33,7 +33,7 @@ read_lines(const char *filename, char *lines[])
     size_t cur_line_len = 0;
     int line_count = 0;
     while ((read = getline(&cur_line, &cur_line_len, fp)) != -1) {
-        strncpy(lines[line_count++], cur_line, cur_line_len);
+        strcpy(lines[line_count++], cur_line);
     }
 
     free(cur_line);
