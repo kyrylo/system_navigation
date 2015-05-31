@@ -1,16 +1,32 @@
-#include <ruby.h>
+/* REALLOCATE! */
+
+#include "method_source_code.h"
 
 #define MAXLINES 1000
 #define MAXLINELEN 300
+#define PARSE_EXPR(parser, str)
 
 static VALUE rb_eSourceNotFoundError;
 
 static int
-read_lines(const char *file, char *lines[])
+find_relevant_lines(char *lines[], char *relevant_lines[],
+		    const int start_line, const int end_line)
 {
-    FILE *fp = fopen(file, "r");
+    int rel_lct = 0;
+
+    do {
+        relevant_lines[rel_lct] = lines[start_line + rel_lct];
+    } while (rel_lct++ < end_line);
+
+    return rel_lct;
+}
+
+static int
+read_lines(const char *filename, char *lines[])
+{
+    FILE *fp = fopen(filename, "r");
     if (fp == NULL) {
-        rb_raise(rb_eIOError, "No such file or directory - %s", file);
+        rb_raise(rb_eIOError, "No such file or directory - %s", filename);
     }
 
     ssize_t read;
@@ -18,7 +34,7 @@ read_lines(const char *file, char *lines[])
     size_t cur_line_len = 0;
     int line_count = 0;
     while ((read = getline(&cur_line, &cur_line_len, fp)) != -1) {
-        strcpy(lines[line_count++], cur_line);
+        strncpy(lines[line_count++], cur_line, cur_line_len);
     }
 
     free(cur_line);
@@ -27,18 +43,64 @@ read_lines(const char *file, char *lines[])
     return line_count;
 }
 
-static VALUE
-source(VALUE self)
-{
-    char **lines = malloc(sizeof(char *) * MAXLINES);
-    for (int i = 0; i < MAXLINES; i++) {
-        lines[i] = malloc(sizeof(char) * (MAXLINELEN + 1));
-    }
+static char **
+allocate_lines(const int maxlines) {
+    char **lines = malloc(sizeof(char *) * maxlines);
 
     if (lines == NULL) {
         rb_raise(rb_eNoMemError, "failed to allocate memory");
     }
 
+    for (int i = 0; i < maxlines; i++) {
+        lines[i] = malloc(sizeof(char) * MAXLINELEN);
+    }
+
+    return lines;
+}
+
+static VALUE
+parse_expr(char str[]) {
+    return rb_funcall(sexp_builder(), rb_intern("parse"), 1, rb_str_new2(str));
+}
+
+static VALUE
+sexp_builder(void)
+{
+    VALUE rb_cRipper = rb_const_get_at(rb_cObject, rb_intern("Ripper"));
+    VALUE rb_cSexpBuilder = rb_const_get_at(rb_cRipper, rb_intern("SexpBuilder"));
+
+    return rb_cSexpBuilder;
+}
+
+static char *
+extract_first_expression(char *lines[], const int linect)
+{
+	char *expr = malloc(linect * MAXLINELEN);
+
+	expr[0] = '\0';
+	for (int i = 0; i < linect; i++) {
+		strcat(expr, lines[i]);
+		if (is_complete_expression(expr)) {
+			return expr;
+		}
+	}
+
+	return NULL;
+}
+
+static int
+is_complete_expression(char *expr)
+{
+	if (parse_expr(expr) != Qnil) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+static VALUE
+mMethodExtensions_source(VALUE self)
+{
     VALUE method = rb_iv_get(self, "@method");
     VALUE source_location = rb_funcall(method, rb_intern("source_location"), 0);
     VALUE name = rb_funcall(method, rb_intern("name"), 0);
@@ -48,24 +110,34 @@ source(VALUE self)
 		 RSTRING_PTR(rb_sym2str(name)));
     }
 
-    const char *file = RSTRING_PTR(RARRAY_AREF(source_location, 0));
+    const char *filename = RSTRING_PTR(RARRAY_AREF(source_location, 0));
     VALUE lineno = RARRAY_AREF(source_location, 1);
 
-    int line_count = read_lines(file, lines);
+    char **lines = allocate_lines(MAXLINES);
+    const int line_count = read_lines(filename, lines);
 
-    VALUE rb_lines = rb_ary_new2(line_count + 1);
-    for(int j = 0; j < line_count; j++) {
-	    rb_ary_push(rb_lines, rb_str_new2(lines[j]));
-    }
+    char **relevant_lines = allocate_lines(line_count);
+    const int start_line = FIX2INT(lineno) - 1;
+    const int end_line = line_count - start_line;
+    const int relevant_linect = find_relevant_lines(lines, relevant_lines,
+						    start_line, end_line);
+
+    char *expr = extract_first_expression(relevant_lines, relevant_linect);
 
     free(lines);
+    free(relevant_lines);
 
-    return rb_lines;
+    VALUE source = rb_str_new2(expr);
+    free(expr);
+
+    return source;
 }
 
 void Init_method_source_code(void)
 {
     VALUE rb_cSystemNavigation, rb_mMethodSourceCode, rb_mMethodExtensions;
+
+    rb_require("ripper");
 
     rb_cSystemNavigation = rb_define_class("SystemNavigation", rb_cObject);
     rb_mMethodSourceCode = rb_define_module_under(rb_cSystemNavigation,
@@ -78,5 +150,6 @@ void Init_method_source_code(void)
     rb_mMethodExtensions = rb_define_module_under(rb_mMethodSourceCode,
 						  "MethodExtensions");
 
-    rb_define_method(rb_mMethodExtensions, "source", source, 0);
+    rb_define_method(rb_mMethodExtensions, "source",
+		     mMethodExtensions_source, 0);
 }

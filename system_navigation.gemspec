@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
   s.files        = %w[
     ext/system_navigation/method_source_code/extconf.rb
     ext/system_navigation/method_source_code/method_source_code.c
+    ext/system_navigation/method_source_code/method_source_code.h
     lib/system_navigation.rb
     lib/system_navigation/ancestor_method_finder.rb
     lib/system_navigation/array_refinement.rb
