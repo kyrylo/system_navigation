@@ -3,7 +3,14 @@ require 'benchmark'
 require 'ripper'
 
 =begin
+Sample methods: 9622
+Rehearsal -------------------------------------------------
+method_source  31.620000   0.190000  31.810000 ( 31.785361)
+--------------------------------------- total: 31.810000sec
 
+                    user     system      total        real
+method_source  30.770000   0.120000  30.890000 ( 30.859638)
+ruby benchmarks/method_source_vs_method_source_code.rb  90.67s user 0.57s system 99% cpu 1:31.86 total
 =end
 
 # Require more classes for more methods.
