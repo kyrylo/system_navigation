@@ -35,6 +35,9 @@ read_lines(const char *filename, char *lines[])
     }
 
     while ((read = getline(&line, &len, fp)) != -1) {
+        if ((line_count != 0) && (line_count % MAXLINES == 0)) {
+            reallocate_lines(lines, line_count + MAXLINES);
+        }
         strncpy(lines[line_count++], line, read);
     }
 
@@ -57,6 +60,18 @@ allocate_lines(const int maxlines) {
     }
 
     return lines;
+}
+
+static void
+reallocate_lines(char *lines[], int new_size)
+{
+    char **temp_lines = realloc(lines, sizeof(char *) * new_size);
+
+    if (temp_lines == NULL) {
+        rb_raise(rb_eNoMemError, "failed to allocate memory");
+    } else {
+        lines = temp_lines;
+    }
 }
 
 static VALUE
