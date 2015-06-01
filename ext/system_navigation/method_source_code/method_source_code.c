@@ -159,7 +159,7 @@ mMethodExtensions_source(VALUE self)
     free(lines);
     free(relevant_lines);
 
-    VALUE source = rb_str_new2(expr);
+    VALUE source = rb_str_new2(expr == NULL ? "" : expr);
     free(expr);
 
     return source;
