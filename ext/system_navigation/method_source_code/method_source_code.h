@@ -9,3 +9,4 @@ static VALUE sexp_builder(void);
 static char *extract_first_expression(char *lines[], const int linect);
 static VALUE mMethodExtensions_source(VALUE self);
 static int is_complete_expression(char *expr);
+static VALUE parse_expr(char *str);

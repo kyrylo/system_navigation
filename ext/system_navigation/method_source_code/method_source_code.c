@@ -80,7 +80,7 @@ reallocate_lines(char **lines[], int line_count)
 }
 
 static VALUE
-parse_expr(char str[]) {
+parse_expr(char *str) {
     return rb_funcall(sexp_builder(), rb_intern("parse"), 1, rb_str_new2(str));
 }
 
