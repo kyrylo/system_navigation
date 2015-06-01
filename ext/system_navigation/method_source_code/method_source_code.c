@@ -1,9 +1,6 @@
 /* REALLOCATE! */
-
 #include "method_source_code.h"
 
-#define MAXLINES 1000
-#define MAXLINELEN 300
 
 static VALUE rb_eSourceNotFoundError;
 
@@ -79,18 +76,32 @@ reallocate_lines(char **lines[], int line_count)
     }
 }
 
-static VALUE
-parse_expr(char *str) {
-    return rb_funcall(sexp_builder(), rb_intern("parse"), 1, rb_str_new2(str));
+static NODE *
+with_silenced_stderr(NODE *(*compile)(const char*, VALUE, int), VALUE rb_str)
+{
+    int old_stderr;
+    FILE *null_fd;
+
+    old_stderr = DUP(STDERR_FILENO);
+    fflush(stderr);
+    null_fd = fopen(null_filename, "w");
+    DUP2(fileno(null_fd), STDERR_FILENO);
+
+    NODE *node = (*compile)("-", rb_str, 1);
+
+    fflush(stderr);
+    fclose(null_fd);
+
+    DUP2(old_stderr, STDERR_FILENO);
+    close(old_stderr);
+
+    return node;
 }
 
 static VALUE
-sexp_builder(void)
-{
-    VALUE rb_cRipper = rb_const_get_at(rb_cObject, rb_intern("Ripper"));
-    VALUE rb_cSexpBuilder = rb_const_get_at(rb_cRipper, rb_intern("SexpBuilder"));
-
-    return rb_cSexpBuilder;
+parse_expr(VALUE rb_str) {
+    NODE *node = with_silenced_stderr(rb_compile_string, rb_str);
+    return node ? Qtrue : Qfalse;
 }
 
 static char *
@@ -112,7 +123,7 @@ extract_first_expression(char *lines[], const int linect)
 static int
 is_complete_expression(char *expr)
 {
-    if (parse_expr(expr) != Qnil) {
+    if (parse_expr(rb_str_new2(expr)) == Qtrue) {
         return 1;
     } else {
         return 0;
@@ -156,21 +167,11 @@ mMethodExtensions_source(VALUE self)
 
 void Init_method_source_code(void)
 {
-    VALUE rb_cSystemNavigation, rb_mMethodSourceCode, rb_mMethodExtensions;
+    VALUE rb_cSystemNavigation = rb_define_class("SystemNavigation", rb_cObject);
+    VALUE rb_mMethodSourceCode = rb_define_module_under(rb_cSystemNavigation, "MethodSourceCode");
 
-    rb_require("ripper");
+    rb_eSourceNotFoundError = rb_define_class_under(rb_mMethodSourceCode,"SourceNotFoundError", rb_eStandardError);
+    VALUE rb_mMethodExtensions = rb_define_module_under(rb_mMethodSourceCode, "MethodExtensions");
 
-    rb_cSystemNavigation = rb_define_class("SystemNavigation", rb_cObject);
-    rb_mMethodSourceCode = rb_define_module_under(rb_cSystemNavigation,
-						  "MethodSourceCode");
-
-    rb_eSourceNotFoundError = rb_define_class_under(rb_mMethodSourceCode,
-						    "SourceNotFoundError",
-						    rb_eStandardError);
-
-    rb_mMethodExtensions = rb_define_module_under(rb_mMethodSourceCode,
-						  "MethodExtensions");
-
-    rb_define_method(rb_mMethodExtensions, "source",
-		     mMethodExtensions_source, 0);
+    rb_define_method(rb_mMethodExtensions, "source", mMethodExtensions_source, 0);
 }

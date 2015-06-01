@@ -14,6 +14,7 @@ Gem::Specification.new do |s|
     ext/system_navigation/method_source_code/extconf.rb
     ext/system_navigation/method_source_code/method_source_code.c
     ext/system_navigation/method_source_code/method_source_code.h
+    ext/system_navigation/method_source_code/node.h
     lib/system_navigation.rb
     lib/system_navigation/ancestor_method_finder.rb
     lib/system_navigation/array_refinement.rb
