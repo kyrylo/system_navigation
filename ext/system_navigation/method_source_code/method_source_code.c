@@ -28,7 +28,6 @@ read_lines(const char *filename, char **lines[], const int start_line)
         if ((line_count != 0) && (line_count % MAXLINES == 0)) {
             reallocate_lines(lines, line_count);
         }
-	printf("line (%d/%d): %s", i,line_count, line);
         strncpy((*lines)[i++], line, read);
 	line_count++;
     }
