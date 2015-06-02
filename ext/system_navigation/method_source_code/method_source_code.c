@@ -5,26 +5,14 @@
 static VALUE rb_eSourceNotFoundError;
 
 static int
-find_relevant_lines(char *lines[], char *relevant_lines[],
-		    const int start_line, const int end_line)
-{
-    int rel_lct = 0;
-
-    do {
-        relevant_lines[rel_lct] = lines[start_line + rel_lct];
-    } while (rel_lct++ < end_line);
-
-    return rel_lct;
-}
-
-static int
-read_lines(const char *filename, char *lines[])
+read_lines(const char *filename, char **lines[], const int start_line)
 {
     FILE *fp;
     ssize_t read;
     char *line = NULL;
     size_t len = 0;
     int line_count = 0;
+    int i = 0;
 
     fp = fopen(filename, "r");
     if (fp == NULL) {
@@ -32,31 +20,23 @@ read_lines(const char *filename, char *lines[])
     }
 
     while ((read = getline(&line, &len, fp)) != -1) {
+	    if (line_count < start_line) {
+		    line_count++;
+		    continue;
+	    }
+
         if ((line_count != 0) && (line_count % MAXLINES == 0)) {
-            reallocate_lines(&lines, line_count);
+            reallocate_lines(lines, line_count);
         }
-        strncpy(lines[line_count++], line, read);
+	printf("line (%d/%d): %s", i,line_count, line);
+        strncpy((*lines)[i++], line, read);
+	line_count++;
     }
 
     free(line);
     fclose(fp);
 
     return line_count;
-}
-
-static char **
-allocate_lines(const int maxlines) {
-    char **lines = malloc(sizeof(char *) * maxlines);
-
-    if (lines == NULL) {
-        rb_raise(rb_eNoMemError, "failed to allocate memory");
-    }
-
-    for (int i = 0; i < maxlines; i++) {
-        lines[i] = malloc(sizeof(char *) * MAXLINELEN);
-    }
-
-    return lines;
 }
 
 static void
@@ -71,7 +51,9 @@ reallocate_lines(char **lines[], int line_count)
         *lines = temp_lines;
 
 	for (int i = line_count; i < new_size; i++) {
-	    (*lines)[i] = malloc(sizeof(char *) * MAXLINELEN);
+		if (((*lines)[i] = malloc(MAXLINELEN)) == NULL) {
+			rb_raise(rb_eNoMemError, "failed to allocate memory");
+		}
 	}
     }
 }
@@ -98,36 +80,27 @@ with_silenced_stderr(NODE *(*compile)(const char*, VALUE, int), VALUE rb_str)
     return node;
 }
 
-static VALUE
+static NODE *
 parse_expr(VALUE rb_str) {
-    NODE *node = with_silenced_stderr(rb_compile_string, rb_str);
-    return node ? Qtrue : Qfalse;
+    return with_silenced_stderr(rb_compile_string, rb_str);
 }
 
-static char *
-extract_first_expression(char *lines[], const int linect)
+static VALUE
+find_expression(char **lines[], const int end_line)
 {
-    char *expr = malloc(linect * MAXLINELEN);
+    char *expr = malloc(end_line * MAXLINELEN);
+    VALUE rb_expr;
 
     expr[0] = '\0';
-    for (int i = 0; i < linect; i++) {
-        strcat(expr, lines[i]);
-        if (is_complete_expression(expr)) {
-            return expr;
-        }
+    for (int i = 0; i < end_line; i++) {
+	    strcat(expr, (*lines)[i]);
+	    rb_expr = rb_str_new2(expr);
+	    if (parse_expr(rb_expr)) {
+		    return rb_expr;
+	    }
     }
 
-    return NULL;
-}
-
-static int
-is_complete_expression(char *expr)
-{
-    if (parse_expr(rb_str_new2(expr)) == Qtrue) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return Qnil;
 }
 
 static VALUE
@@ -142,25 +115,28 @@ mMethodExtensions_source(VALUE self)
 		 RSTRING_PTR(rb_sym2str(name)));
     }
 
+    char **lines;
+    if ((lines = malloc(sizeof(char *) * MAXLINES)) == NULL) {
+	    rb_raise(rb_eNoMemError, "failed to allocate memory");
+    }
+
+    for (int i = 0; i < MAXLINES; i++) {
+	    if ((lines[i] = malloc(MAXLINELEN)) == NULL) {
+		    rb_raise(rb_eNoMemError, "failed to allocate memory");
+	    };
+    }
+
     const char *filename = RSTRING_PTR(RARRAY_AREF(source_location, 0));
-    VALUE lineno = RARRAY_AREF(source_location, 1);
+    const int start_line = FIX2INT(RARRAY_AREF(source_location, 1)) - 1;
+    const int line_count = read_lines(filename, &lines, start_line);
 
-    char **lines = allocate_lines(MAXLINES);
-    const int line_count = read_lines(filename, lines);
-
-    char **relevant_lines = allocate_lines(line_count);
-    const int start_line = FIX2INT(lineno) - 1;
     const int end_line = line_count - start_line;
-    const int relevant_linect = find_relevant_lines(lines, relevant_lines,
-						    start_line, end_line);
+    VALUE source = find_expression(&lines, end_line);
 
-    char *expr = extract_first_expression(relevant_lines, relevant_linect);
-
+    for (int j = 0; j < MAXLINES; j++) {
+	    free(lines[j]);
+    }
     free(lines);
-    free(relevant_lines);
-
-    VALUE source = rb_str_new2(expr ? expr : "");
-    free(expr);
 
     return source;
 }

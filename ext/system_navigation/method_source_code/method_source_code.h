@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <ruby.h>
 #include "node.h"
 
@@ -17,14 +18,10 @@ static const char *null_filename = "/dev/null";
 #define MAXLINES 1000
 #define MAXLINELEN 300
 
-static int find_relevant_lines(char *lines[], char *relevant_lines[],
-			       const int start_line, const int end_line);
-static int read_lines(const char *filename, char *lines[]);
-static char **allocate_lines(const int maxlines);
+static int read_lines(const char *filename, char **lines[], const int start_line);
 static void reallocate_lines(char **lines[], int line_count);
-static char *extract_first_expression(char *lines[], const int linect);
+static VALUE find_expression(char **lines[], const int end_line);
 static VALUE mMethodExtensions_source(VALUE self);
-static int is_complete_expression(char *expr);
-static VALUE parse_expr(VALUE rb_str);
+static NODE *parse_expr(VALUE rb_str);
 static NODE *with_silenced_stderr(NODE *(*compile)(const char*, VALUE, int),
 				  VALUE rb_str);
