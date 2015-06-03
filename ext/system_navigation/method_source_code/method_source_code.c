@@ -25,10 +25,13 @@ read_lines(const char *filename, char **lines[], const int start_line)
 		    continue;
 	    }
 
-        if ((line_count != 0) && (line_count % MAXLINES == 0)) {
+        if ((i != 0) && (i % MAXLINES == 0)) {
             reallocate_lines(lines, line_count);
         }
-        strncpy((*lines)[i++], line, read);
+
+        strncpy((*lines)[i], line, read);
+	(*lines)[i][read] = '\0';
+	i++;
 	line_count++;
     }
 
@@ -92,6 +95,22 @@ find_expression(char **lines[], const int end_line)
 
     expr[0] = '\0';
     for (int i = 0; i < end_line; i++) {
+	    char *line = (*lines)[0];
+	    size_t line_len = strlen(line);
+	    for (size_t j = 0; j < line_len; j++) {
+		    if (line[j] == '#' && line[j + 1] == '{') {
+			    int k = j + 2;
+			    line[j] = 't';
+			    line[j + 1] = 't';
+			    while (line[k] != '}') {
+				    line[k++] = 't';
+			    }
+			    line[k] = 't';
+			    break;
+		    }
+	    }
+
+	    printf("%s", (*lines)[i]);
 	    strcat(expr, (*lines)[i]);
 	    rb_expr = rb_str_new2(expr);
 	    if (parse_expr(rb_expr)) {
