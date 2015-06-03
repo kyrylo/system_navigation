@@ -45,7 +45,7 @@ static void
 reallocate_lines(char **lines[], int line_count)
 {
     int new_size = line_count + MAXLINES;
-    char **temp_lines = realloc(*lines, sizeof(char *) * new_size);
+    char **temp_lines = realloc(*lines, sizeof(*temp_lines) * new_size);
 
     if (temp_lines == NULL) {
         rb_raise(rb_eNoMemError, "failed to allocate memory");
@@ -134,7 +134,7 @@ mMethodExtensions_source(VALUE self)
     }
 
     char **lines;
-    if ((lines = malloc(sizeof(char *) * MAXLINES)) == NULL) {
+    if ((lines = malloc(sizeof(*lines) * MAXLINES)) == NULL) {
 	    rb_raise(rb_eNoMemError, "failed to allocate memory");
     }
 
