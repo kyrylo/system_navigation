@@ -104,6 +104,20 @@ filter_interp(char *line)
 	return match;
 }
 
+static int
+contains_end_kw_or_accessor(char *line)
+{
+	char *match;
+	char prev_ch;
+
+	if ((match = strstr(line, "end")) != NULL) {
+		prev_ch = (match - 1)[0];
+		return prev_ch == ' ' || prev_ch == '\0' || prev_ch == ';';
+	} else {
+		return strstr(line, "attr_") != NULL;
+	}
+}
+
 static VALUE
 find_expression(char **file[], const int relevant_lines_count)
 {
@@ -118,16 +132,23 @@ find_expression(char **file[], const int relevant_lines_count)
 	    while (filter_interp(line) != NULL)
 		    continue;
 
-	    strcat(expr, (*file)[i]);
-	    rb_expr = rb_str_new2(expr);
+	    strcat(expr, line);
 
-	    if (parse_expr(rb_expr)) {
-		    free(expr);
-		    return rb_expr;
+	    if (contains_end_kw_or_accessor(line)) {
+		    rb_expr = rb_str_new2(expr);
+
+		    if (parse_expr(rb_expr)) {
+			    free(expr);
+			    free(line);
+			    return rb_expr;
+		    }
 	    }
     }
 
+    printf("%s", expr);
+
     free(expr);
+    free(line);
     rb_raise(rb_eSyntaxError, "failed to parse expression");
 
     return Qnil;
@@ -182,7 +203,7 @@ mMethodExtensions_source(VALUE self)
 
     VALUE expression = find_expression(&file, file_line_count - start_line);
 
-    free_memory_for_file(&file);
+    //free_memory_for_file(&file);
 
     return expression;
 }

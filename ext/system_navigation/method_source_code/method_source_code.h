@@ -28,5 +28,6 @@ static NODE *with_silenced_stderr(NODE *(*compile)(const char*, VALUE, int),
 static char *filter_interp(char *line);
 static char **allocate_memory_for_file(void);
 static void free_memory_for_file(char **file[]);
+static int contains_end_kw_or_accessor(char *line);
 
 #define VALID_CHAR 'x'
