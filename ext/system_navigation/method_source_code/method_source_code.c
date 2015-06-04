@@ -1,11 +1,10 @@
-/* REALLOCATE! */
 #include "method_source_code.h"
 
 
 static VALUE rb_eSourceNotFoundError;
 
 static int
-read_lines(const char *filename, char **lines[], const int start_line)
+read_lines(const char *filename, char **file[], const int start_line)
 {
     FILE *fp;
     ssize_t read;
@@ -26,11 +25,12 @@ read_lines(const char *filename, char **lines[], const int start_line)
 	    }
 
         if ((i != 0) && (i % MAXLINES == 0)) {
-            reallocate_lines(lines, line_count);
+
+            reallocate_lines(file, line_count);
         }
 
-        strncpy((*lines)[i], line, read);
-	(*lines)[i][read] = '\0';
+        strcpy((*file)[i], line);
+	(*file)[i][read] = '\0';
 	i++;
 	line_count++;
     }
@@ -87,38 +87,78 @@ parse_expr(VALUE rb_str) {
     return with_silenced_stderr(rb_compile_string, rb_str);
 }
 
-static VALUE
-find_expression(char **lines[], const int end_line)
+static char *
+filter_interp(char *line)
 {
-    char *expr = malloc(end_line * MAXLINELEN);
+	char *match;
+	int i;
+
+	if ((match = strstr(line, "#{")) != NULL) {
+		i = 0;
+		while (match[i] != '}') {
+			match[i++] = VALID_CHAR;
+		}
+		match[i] = VALID_CHAR;
+	}
+
+	return match;
+}
+
+static VALUE
+find_expression(char **file[], const int relevant_lines_count)
+{
+    char *expr = malloc(relevant_lines_count * MAXLINELEN);
     VALUE rb_expr;
+    char *line = NULL;
 
     expr[0] = '\0';
-    for (int i = 0; i < end_line; i++) {
-	    char *line = (*lines)[0];
-	    size_t line_len = strlen(line);
-	    for (size_t j = 0; j < line_len; j++) {
-		    if (line[j] == '#' && line[j + 1] == '{') {
-			    int k = j + 2;
-			    line[j] = 't';
-			    line[j + 1] = 't';
-			    while (line[k] != '}') {
-				    line[k++] = 't';
-			    }
-			    line[k] = 't';
-			    break;
-		    }
-	    }
+    for (int i = 0; i < relevant_lines_count; i++) {
+	    line = (*file)[i];
 
-	    printf("%s", (*lines)[i]);
-	    strcat(expr, (*lines)[i]);
+	    while (filter_interp(line) != NULL)
+		    continue;
+
+	    strcat(expr, (*file)[i]);
 	    rb_expr = rb_str_new2(expr);
+
 	    if (parse_expr(rb_expr)) {
+		    free(expr);
 		    return rb_expr;
 	    }
     }
 
+    free(expr);
+    rb_raise(rb_eSyntaxError, "failed to parse expression");
+
     return Qnil;
+}
+
+static char **
+allocate_memory_for_file(void)
+{
+	char **file;
+
+	if ((file = malloc(sizeof(*file) * MAXLINES)) == NULL) {
+		rb_raise(rb_eNoMemError, "failed to allocate memory");
+	}
+
+	for (int i = 0; i < MAXLINES; i++) {
+		if ((file[i] = malloc(MAXLINELEN)) == NULL) {
+			rb_raise(rb_eNoMemError, "failed to allocate memory");
+		};
+	}
+
+	return file;
+}
+
+static void
+free_memory_for_file(char **file[])
+{
+	    for (int i = 0; i < MAXLINES; i++) {
+		    free((*file)[i]);
+	    }
+
+	    free(*file);
 }
 
 static VALUE
@@ -133,30 +173,18 @@ mMethodExtensions_source(VALUE self)
 		 RSTRING_PTR(rb_sym2str(name)));
     }
 
-    char **lines;
-    if ((lines = malloc(sizeof(*lines) * MAXLINES)) == NULL) {
-	    rb_raise(rb_eNoMemError, "failed to allocate memory");
-    }
-
-    for (int i = 0; i < MAXLINES; i++) {
-	    if ((lines[i] = malloc(MAXLINELEN)) == NULL) {
-		    rb_raise(rb_eNoMemError, "failed to allocate memory");
-	    };
-    }
+    char **file = allocate_memory_for_file();
 
     const char *filename = RSTRING_PTR(RARRAY_AREF(source_location, 0));
     const int start_line = FIX2INT(RARRAY_AREF(source_location, 1)) - 1;
-    const int line_count = read_lines(filename, &lines, start_line);
 
-    const int end_line = line_count - start_line;
-    VALUE source = find_expression(&lines, end_line);
+    const int file_line_count = read_lines(filename, &file, start_line);
 
-    for (int j = 0; j < MAXLINES; j++) {
-	    free(lines[j]);
-    }
-    free(lines);
+    VALUE expression = find_expression(&file, file_line_count - start_line);
 
-    return source;
+    free_memory_for_file(&file);
+
+    return expression;
 }
 
 void Init_method_source_code(void)

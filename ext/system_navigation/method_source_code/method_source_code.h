@@ -18,10 +18,15 @@ static const char *null_filename = "/dev/null";
 #define MAXLINES 1000
 #define MAXLINELEN 300
 
-static int read_lines(const char *filename, char **lines[], const int start_line);
+static int read_lines(const char *filename, char **file[], const int start_line);
 static void reallocate_lines(char **lines[], int line_count);
 static VALUE find_expression(char **lines[], const int end_line);
 static VALUE mMethodExtensions_source(VALUE self);
 static NODE *parse_expr(VALUE rb_str);
 static NODE *with_silenced_stderr(NODE *(*compile)(const char*, VALUE, int),
 				  VALUE rb_str);
+static char *filter_interp(char *line);
+static char **allocate_memory_for_file(void);
+static void free_memory_for_file(char **file[]);
+
+#define VALID_CHAR 'x'
