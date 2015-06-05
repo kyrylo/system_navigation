@@ -174,7 +174,7 @@ is_static_definition(const char *line)
 static VALUE
 find_expression(char **file[], const int occupied_lines)
 {
-    char *expr = malloc(occupied_lines * MAXLINELEN);
+    char expr[occupied_lines * MAXLINELEN];
     VALUE rb_expr;
     char *first_line = (*file)[0];
     char *line = NULL;
@@ -204,13 +204,11 @@ find_expression(char **file[], const int occupied_lines)
             rb_expr = rb_str_new2(expr);
 
             if (parse_expr(rb_expr)) {
-       	        free(expr);
                 return rb_expr;
             }
         }
     }
 
-    free(expr);
     free_memory_for_file(file, occupied_lines);
     rb_raise(rb_eSyntaxError, "failed to parse expression (probably a bug)");
 
