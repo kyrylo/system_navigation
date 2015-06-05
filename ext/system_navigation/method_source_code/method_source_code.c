@@ -1,8 +1,6 @@
 #include "method_source_code.h"
 
-
 static VALUE rb_eSourceNotFoundError;
-
 
 static int
 read_lines(const char *filename, char **file[], const int start_line)
@@ -103,74 +101,74 @@ parse_expr(VALUE rb_str) {
 static char *
 filter_interp(char *line)
 {
-	char *match;
-	char *prev_ch;
-	int i;
+    char *match;
+    char *prev_ch;
+    int i;
 
-	if ((match = strstr(line, "#{")) != NULL) {
-		i = 0;
+    if ((match = strstr(line, "#{")) != NULL) {
+	i = 0;
 
-		if ((prev_ch = (match - 1))[0] == '\\') {
-			*prev_ch = VALID_CHAR;
-		}
-
-		while (match[i] != '}') {
-			match[i++] = VALID_CHAR;
-		}
-		match[i] = VALID_CHAR;
+	if ((prev_ch = (match - 1))[0] == '\\') {
+	    *prev_ch = VALID_CHAR;
 	}
 
-	return match;
+	while (match[i] != '}') {
+	    match[i++] = VALID_CHAR;
+	}
+	match[i] = VALID_CHAR;
+    }
+
+    return match;
 }
 
 static int
 contains_end_kw(const char *line)
 {
-	char *match;
-	char prev_ch;
+    char *match;
+    char prev_ch;
 
-	if ((match = strstr(line, "end")) != NULL) {
-		prev_ch = (match - 1)[0];
-		return prev_ch == ' ' || prev_ch == '\0' || prev_ch == ';';
-	} else {
-		return 0;
-	}
+    if ((match = strstr(line, "end")) != NULL) {
+	prev_ch = (match - 1)[0];
+	return prev_ch == ' ' || prev_ch == '\0' || prev_ch == ';';
+    } else {
+	return 0;
+    }
 }
 
 static int
 is_accessor(const char *line)
 {
-	return strstr(line, "attr_reader") != NULL ||
-		strstr(line, "attr_writer") != NULL ||
-		strstr(line, "attr_accessor") != NULL;
+    return strstr(line, "attr_reader") != NULL ||
+	strstr(line, "attr_writer") != NULL ||
+	strstr(line, "attr_accessor") != NULL;
 }
 
 static int
 is_comment(const char *line)
 {
-	size_t line_len = strlen(line);
+    size_t line_len = strlen(line);
 
-	for (size_t i = 0; i < line_len; i++) {
-		if (line[i] == ' ')
-			continue;
+    for (size_t i = 0; i < line_len; i++) {
+	if (line[i] == ' ')
+	    continue;
 
-		if (line[i] == '#' && line[i + 1] != '{') {
-			for (size_t j = i - 1; j != 0; j--) {
-				if (line[j] != ' ')
-					return 0;
-			}
+	if (line[i] == '#' && line[i + 1] != '{') {
+	    for (size_t j = i - 1; j != 0; j--) {
+		if (line[j] != ' ')
+		    return 0;
+	    }
 
-			return 1;
-		}
+	    return 1;
 	}
+    }
 
-	return 0;
+    return 0;
 }
 
 static int
 is_static_definition(const char *line)
 {
-	return strstr(line, " def ") != NULL || strncmp(line, "def ", 4);
+    return strstr(line, " def ") != NULL || strncmp(line, "def ", 4);
 }
 
 static VALUE
@@ -185,11 +183,11 @@ find_expression(char **file[], const int occupied_lines)
     expr[0] = '\0';
 
     if (is_static_definition(first_line)) {
-    	    should_parse = 1;
+	should_parse = 1;
     } else if (is_accessor(first_line)) {
-    	    should_parse = 1;
+	should_parse = 1;
     } else {
-    	    should_parse = 0;
+	should_parse = 0;
     }
 
     for (int i = 0; i < occupied_lines; i++) {
