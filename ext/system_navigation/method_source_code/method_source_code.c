@@ -3,14 +3,15 @@
 
 static VALUE rb_eSourceNotFoundError;
 
+
 static int
 read_lines(const char *filename, char **file[], const int start_line)
 {
     FILE *fp;
     ssize_t read;
     char *line = NULL;
-    char *occupied_line;
     size_t len = 0;
+    size_t line_len = 0;
     int line_count = 0;
     int occupied_lines = 0;
 
@@ -30,20 +31,20 @@ read_lines(const char *filename, char **file[], const int start_line)
             reallocate_lines(file, occupied_lines);
         }
 
-	// Not working properly yet...
-        /* if (read >= MAXLINELEN) { */
-        /*     char *tmp; */
+	line_len = strlen(line);
 
-        /*     if ((tmp = realloc((*file)[occupied_lines], read + 1)) == NULL) { */
-        /*         rb_raise(rb_eNoMemError, "failed to allocate memory"); */
-        /*     } */
+        if (line_len >= MAXLINELEN) {
+            char *tmp;
 
-        /*     line = tmp; */
-	/* } */
+            if ((tmp = realloc((*file)[occupied_lines], line_len)) == NULL) {
+                rb_raise(rb_eNoMemError, "failed to allocate memory");
+            }
 
-	occupied_line = (*file)[occupied_lines];
-        strncpy(occupied_line, line, read);
-	occupied_line[read] = '\0';
+	    (*file)[occupied_lines] = tmp;
+	}
+
+        strncpy((*file)[occupied_lines], line, read);
+	(*file)[occupied_lines][read] = '\0';
 	occupied_lines++;
     }
 
@@ -184,33 +185,33 @@ find_expression(char **file[], const int occupied_lines)
     expr[0] = '\0';
 
     if (is_static_definition(first_line)) {
-	    should_parse = 1;
+    	    should_parse = 1;
     } else if (is_accessor(first_line)) {
-	    should_parse = 1;
+    	    should_parse = 1;
     } else {
-	    should_parse = 0;
+    	    should_parse = 0;
     }
 
     for (int i = 0; i < occupied_lines; i++) {
-	    line = (*file)[i];
+        line = (*file)[i];
 
-	    if (is_comment(line))
-		    continue;
+        if (is_comment(line))
+            continue;
 
-	    while (filter_interp(line) != NULL)
-		    continue;
+        while (filter_interp(line) != NULL)
+            continue;
 
-	    if (should_parse || contains_end_kw(line)) {
-		    rb_expr = rb_str_new2(expr);
+        if (should_parse || contains_end_kw(line)) {
+            strcat(expr, line);
+            rb_expr = rb_str_new2(expr);
 
-		    if (parse_expr(rb_expr)) {
-			    free(expr);
-			    return rb_expr;
-		    }
-	    }
+            if (parse_expr(rb_expr)) {
+       	        free(expr);
+                return rb_expr;
+            }
+        }
     }
 
-    printf("%s", (*file)[0]);
     free(expr);
     free_memory_for_file(file, occupied_lines);
     rb_raise(rb_eSyntaxError, "failed to parse expression (probably a bug)");

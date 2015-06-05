@@ -16,7 +16,7 @@ static const char *null_filename = "/dev/null";
 #endif
 
 #define MAXLINES 1000
-#define MAXLINELEN 600
+#define MAXLINELEN 300
 
 static int read_lines(const char *filename, char **file[], const int start_line);
 static void reallocate_lines(char **lines[], int occupied_lines);
