@@ -221,7 +221,8 @@ find_expression(char **file[], const int relevant_lines_count)
     }
 
     free(expr);
-    rb_raise(rb_eSyntaxError, "failed to parse expression");
+    free_memory_for_file(file, relevant_lines_count);
+    rb_raise(rb_eSyntaxError, "failed to parse expression (probably a bug)");
 
     return Qnil;
 }
