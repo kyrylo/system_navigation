@@ -183,11 +183,11 @@ find_expression(char **file[], const int occupied_lines)
     expr[0] = '\0';
 
     if (is_static_definition(first_line)) {
-	should_parse = 1;
+        should_parse = 1;
     } else if (is_accessor(first_line)) {
-	should_parse = 1;
+        should_parse = 1;
     } else {
-	should_parse = 0;
+        should_parse = 0;
     }
 
     for (int i = 0; i < occupied_lines; i++) {
@@ -236,7 +236,9 @@ allocate_memory_for_file(void)
 static void
 free_memory_for_file(char **file[], const int occupied_lines)
 {
-    for (int i = 0; i < occupied_lines; i++) {
+    int lines_to_free = occupied_lines >= MAXLINES ? occupied_lines : MAXLINES;
+
+    for (int i = 0; i < lines_to_free; i++) {
         free((*file)[i]);
     }
 
