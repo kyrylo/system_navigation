@@ -24,7 +24,6 @@ read_lines(const char *filename, char **file[], const int start_line)
             continue;
         }
 
-
         if ((occupied_lines != 0) && (occupied_lines % (MAXLINES-1) == 0)) {
             reallocate_lines(file, occupied_lines);
         }
@@ -34,7 +33,7 @@ read_lines(const char *filename, char **file[], const int start_line)
         if (line_len >= MAXLINELEN) {
             char *tmp;
 
-            if ((tmp = realloc((*file)[occupied_lines], line_len)) == NULL) {
+            if ((tmp = realloc((*file)[occupied_lines], line_len + 1)) == NULL) {
                 rb_raise(rb_eNoMemError, "failed to allocate memory");
             }
 
