@@ -29,7 +29,7 @@ read_lines(const char *filename, char **file[], const int start_line)
             reallocate_lines(file, occupied_lines);
         }
 
-	line_len = strlen(line);
+        line_len = strlen(line);
 
         if (line_len >= MAXLINELEN) {
             char *tmp;
@@ -38,12 +38,12 @@ read_lines(const char *filename, char **file[], const int start_line)
                 rb_raise(rb_eNoMemError, "failed to allocate memory");
             }
 
-	    (*file)[occupied_lines] = tmp;
-	}
+            (*file)[occupied_lines] = tmp;
+        }
 
         strncpy((*file)[occupied_lines], line, read);
-	(*file)[occupied_lines][read] = '\0';
-	occupied_lines++;
+        (*file)[occupied_lines][read] = '\0';
+        occupied_lines++;
     }
 
     free(line);
@@ -98,27 +98,38 @@ parse_expr(VALUE rb_str) {
     return with_silenced_stderr(rb_compile_string, rb_str);
 }
 
-static char *
+static int
 filter_interp(char *line)
 {
-    char *match;
-    char *prev_ch;
-    int i;
+    int dangling = 0;
+    int brackets = 0;
 
-    if ((match = strstr(line, "#{")) != NULL) {
-	i = 0;
+    for (int i = 0; line[i] != '\0'; i++) {
+        if (line[i] == '#') {
+            if (line[i + 1] == '{') {
+                brackets++;
+                dangling = 1;
 
-	if ((prev_ch = (match - 1))[0] == '\\') {
-	    *prev_ch = VALID_CHAR;
-	}
+                line[i] = SAFE_CHAR;
 
-	while (match[i] != '}') {
-	    match[i++] = VALID_CHAR;
-	}
-	match[i] = VALID_CHAR;
+                if (line[i - 1] == '\\')
+                    line[i - 1] = SAFE_CHAR;
+            }
+        }
+
+        if (dangling == 1 && line[i] == '}') {
+            brackets--;
+
+            if (brackets == 0) {
+                dangling = 0;
+                line[i] = SAFE_CHAR;
+            }
+        } else if (brackets > 0) {
+            line[i] = SAFE_CHAR;
+        }
     }
 
-    return match;
+    return brackets;
 }
 
 static int
@@ -128,10 +139,10 @@ contains_end_kw(const char *line)
     char prev_ch;
 
     if ((match = strstr(line, "end")) != NULL) {
-	prev_ch = (match - 1)[0];
-	return prev_ch == ' ' || prev_ch == '\0' || prev_ch == ';';
+        prev_ch = (match - 1)[0];
+        return prev_ch == ' ' || prev_ch == '\0' || prev_ch == ';';
     } else {
-	return 0;
+        return 0;
     }
 }
 
@@ -139,8 +150,8 @@ static int
 is_accessor(const char *line)
 {
     return strstr(line, "attr_reader") != NULL ||
-	strstr(line, "attr_writer") != NULL ||
-	strstr(line, "attr_accessor") != NULL;
+        strstr(line, "attr_writer") != NULL ||
+        strstr(line, "attr_accessor") != NULL;
 }
 
 static int
@@ -149,17 +160,17 @@ is_comment(const char *line)
     size_t line_len = strlen(line);
 
     for (size_t i = 0; i < line_len; i++) {
-	if (line[i] == ' ')
-	    continue;
+        if (line[i] == ' ')
+            continue;
 
-	if (line[i] == '#' && line[i + 1] != '{') {
-	    for (size_t j = i - 1; j != 0; j--) {
-		if (line[j] != ' ')
-		    return 0;
-	    }
+        if (line[i] == '#' && line[i + 1] != '{') {
+            for (size_t j = i - 1; j != 0; j--) {
+                if (line[j] != ' ')
+                    return 0;
+            }
 
-	    return 1;
-	}
+            return 1;
+        }
     }
 
     return 0;
@@ -174,13 +185,16 @@ is_static_definition(const char *line)
 static VALUE
 find_expression(char **file[], const int occupied_lines)
 {
-    char expr[occupied_lines * MAXLINELEN];
-    VALUE rb_expr;
+    unsigned expr_size = occupied_lines * MAXLINELEN;
+    char expr[expr_size];
+    char parseable_expr[expr_size];
     char *first_line = (*file)[0];
     char *line = NULL;
     int should_parse;
+    int dangling_brackets = 0;
 
     expr[0] = '\0';
+    parseable_expr[0] = '\0';
 
     if (is_static_definition(first_line)) {
         should_parse = 1;
@@ -193,18 +207,23 @@ find_expression(char **file[], const int occupied_lines)
     for (int i = 0; i < occupied_lines; i++) {
         line = (*file)[i];
 
+        strcat(expr, line);
+
         if (is_comment(line))
             continue;
 
-        while (filter_interp(line) != NULL)
+        if (dangling_brackets)
+            continue;
+
+        dangling_brackets = filter_interp(line);
+        strcat(parseable_expr, line);
+
+        if (dangling_brackets)
             continue;
 
         if (should_parse || contains_end_kw(line)) {
-            strcat(expr, line);
-            rb_expr = rb_str_new2(expr);
-
-            if (parse_expr(rb_expr)) {
-                return rb_expr;
+            if (parse_expr(rb_str_new2(parseable_expr)) != NULL) {
+                return rb_str_new2(expr);
             }
         }
     }
@@ -254,7 +273,7 @@ mMethodExtensions_source(VALUE self)
 
     if (NIL_P(source_location)) {
         rb_raise(rb_eSourceNotFoundError, "Could not locate source for %s!",
-		 RSTRING_PTR(rb_sym2str(name)));
+                 RSTRING_PTR(rb_sym2str(name)));
     }
 
     char **file = allocate_memory_for_file();
