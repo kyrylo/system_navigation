@@ -33,7 +33,6 @@ task :uninstall do
 end
 
 task :req => [:uninstall, :cleanup, :compile, :gem, :install] do
-  system 'pry -rsystem_navigation'
 end
 
 task :install do
