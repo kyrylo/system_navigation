@@ -1,7 +1,13 @@
 class SystemNavigation
-  class CompiledMethod
+  class CompiledMethod2
     include SystemNavigation::MethodSourceCode::MethodExtensions
 
+    def initialize(method)
+      @method = method
+    end
+  end
+
+  class CompiledMethod
     def self.compile(method)
       self.new(method).compile
     end
