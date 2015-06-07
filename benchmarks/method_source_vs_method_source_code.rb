@@ -41,10 +41,13 @@ require 'tempfile'
 require 'weakref'
 require 'yaml'
 require 'xmlrpc'
+require 'ripper'
 
 require_relative '../lib/system_navigation'
 
-method_list = SystemNavigation.default.all_methods.select(&:source_location).
+puts "Counting the number of sample methods..."
+
+method_list = SystemNavigation.default.all_methods.select(&:source_location).sort_by(&:hash).
               select do |method|
   begin
     method.source
@@ -57,6 +60,14 @@ puts "Sample methods: #{method_list.count}"
 
 Benchmark.bmbm do |bm|
   bm.report('method_source') do
-    method_list.map(&:source)
+    method_list.map do |method|
+      method.source
+    end
+  end
+
+  bm.report('method_source_code') do
+    method_list.map do |method|
+      SystemNavigation::CompiledMethod2.new(method).source
+    end
   end
 end
