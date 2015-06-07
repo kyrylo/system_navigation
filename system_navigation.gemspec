@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.author       = 'Kyrylo Silin'
   s.email        = 'silin@kyrylo.org'
   s.homepage     = 'https://github.com/kyrylo/system_navigation'
-  s.licenses     = 'MIT'
+  s.licenses     = 'Zlib'
 
   s.require_path = 'lib'
   s.files        = %w[
