@@ -1,12 +1,4 @@
 class SystemNavigation
-  class CompiledMethod2
-    include SystemNavigation::MethodSourceCode::MethodExtensions
-
-    def initialize(method)
-      @method = method
-    end
-  end
-
   class CompiledMethod
     def self.compile(method)
       self.new(method).compile
@@ -18,14 +10,14 @@ class SystemNavigation
       @decoder = InstructionStream::Decoder.new(@scanner)
 
       begin
-        @source = @method.source
-      rescue MethodSource::SourceNotFoundError, NoMethodError, Errno::ENOTDIR
+        @source = FastMethodSource.source_for(@method)
+      rescue FastMethodSource::SourceNotFoundError, NoMethodError, Errno::ENOTDIR
         @source = ''
       end
 
       begin
         @comment = @method.comment
-      rescue MethodSource::SourceNotFoundError, NoMethodError, Errno::ENOTDIR
+      rescue FastMethodSource::SourceNotFoundError, NoMethodError, Errno::ENOTDIR
         @comment = ''
       end
     end
