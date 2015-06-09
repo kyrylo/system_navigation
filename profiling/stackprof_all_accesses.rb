@@ -4,6 +4,8 @@ require_relative '../lib/system_navigation'
 
 sn = SystemNavigation.default
 
+# To read the report run:
+#   stackprof d.dump --text
 StackProf.run(mode: :cpu, out: 'all_accesses.dump') do
   sn.all_accesses(to: :@foo)
 end
@@ -11,38 +13,38 @@ end
 =begin
 ==================================
   Mode: cpu(1000)
-  Samples: 2922 (0.10% miss rate)
-  GC: 453 (15.50%)
+  Samples: 356 (2.73% miss rate)
+  GC: 39 (10.96%)
 ==================================
      TOTAL    (pct)     SAMPLES    (pct)     FRAME
-      1128  (38.6%)        1128  (38.6%)     block in MethodSource::CodeHelpers#complete_expression?
-       381  (13.0%)         381  (13.0%)     block in MethodSource::CodeHelpers#extract_last_comment
-       175   (6.0%)         175   (6.0%)     SystemNavigation::InstructionStream::Instruction#initialize
-       133   (4.6%)         133   (4.6%)     SystemNavigation::InstructionStream::Instruction#parse_service_instruction
-       114   (3.9%)         114   (3.9%)     SystemNavigation::InstructionStream::Instruction#parse_operand
-        88   (3.0%)          88   (3.0%)     SystemNavigation::InstructionStream#decode
-        75   (2.6%)          75   (2.6%)     SystemNavigation::InstructionStream::Instruction#parse_position
-      1224  (41.9%)          56   (1.9%)     MethodSource::CodeHelpers#complete_expression?
-        41   (1.4%)          41   (1.4%)     SystemNavigation::InstructionStream::Instruction#parse_opcode
-        39   (1.3%)          39   (1.3%)     #<Module:0x007f53550e66e0>.===
-        27   (0.9%)          27   (0.9%)     SystemNavigation::InstructionStream::Instruction#parse_lineno
-        21   (0.7%)          21   (0.7%)     SystemNavigation::InstructionStream::Instruction#sending?
-        41   (1.4%)          20   (0.7%)     SystemNavigation::InstructionStream::Instruction#parse_op_id
-        20   (0.7%)          20   (0.7%)     SystemNavigation::InstructionStream::Instruction#accessing_ivar?
-        16   (0.5%)          16   (0.5%)     SystemNavigation::InstructionStream::Instruction#vm_operative?
-        14   (0.5%)          14   (0.5%)     SystemNavigation::InstructionStream::Instruction#reads_ivar?
-        13   (0.4%)          13   (0.4%)     SystemNavigation::InstructionStream::Instruction#writes_ivar?
-       666  (22.8%)          12   (0.4%)     SystemNavigation::InstructionStream#iseqs
-        10   (0.3%)          10   (0.3%)     SystemNavigation::InstructionStream::Instruction#evals?
-         9   (0.3%)           9   (0.3%)     SystemNavigation::InstructionStream#initialize
-      1232  (42.2%)           6   (0.2%)     block in MethodSource::CodeHelpers#extract_first_expression
-         5   (0.2%)           5   (0.2%)     block in #<Module:0x007f5356772d00>#all_subclasses
-       719  (24.6%)           5   (0.2%)     SystemNavigation::InstructionStream::Decoder#select_instructions
-         5   (0.2%)           5   (0.2%)     SystemNavigation::InstructionStream::Instruction#dynamically_reads_ivar?
-      2456  (84.1%)           4   (0.1%)     SystemNavigation::MethodQuery#evaluate
-      1243  (42.5%)           4   (0.1%)     MethodSource::MethodExtensions#source
-      1239  (42.4%)           3   (0.1%)     #<Module:0x007f53550fdfc0>.source_helper
-         3   (0.1%)           3   (0.1%)     SystemNavigation::AncestorMethodFinder#initialize
-         3   (0.1%)           3   (0.1%)     SystemNavigation::InstructionStream::Instruction::AttrWriterInstruction#visit
-         4   (0.1%)           3   (0.1%)     SystemNavigation::MethodHash#initialize
+        92  (25.8%)          92  (25.8%)     #<Module:0x007f51fe19c5b0>.source_for
+        44  (12.4%)          43  (12.1%)     #<Module:0x007f51fe19c5b0>.comment_for
+        27   (7.6%)          27   (7.6%)     SystemNavigation::InstructionStream::Instruction#initialize
+        23   (6.5%)          23   (6.5%)     SystemNavigation::InstructionStream::Instruction#parse_service_instruction
+        21   (5.9%)          21   (5.9%)     SystemNavigation::InstructionStream::Instruction#parse_operand
+        16   (4.5%)          16   (4.5%)     SystemNavigation::InstructionStream#decode
+        15   (4.2%)          15   (4.2%)     SystemNavigation::InstructionStream::Instruction#parse_position
+        10   (2.8%)          10   (2.8%)     SystemNavigation::InstructionStream::Instruction#parse_opcode
+        10   (2.8%)          10   (2.8%)     SystemNavigation::InstructionStream::Instruction#sending?
+         6   (1.7%)           6   (1.7%)     SystemNavigation::InstructionStream::Instruction#parse_lineno
+         6   (1.7%)           6   (1.7%)     SystemNavigation::InstructionStream#initialize
+         5   (1.4%)           5   (1.4%)     SystemNavigation::InstructionStream::Instruction#reads_ivar?
+         5   (1.4%)           5   (1.4%)     SystemNavigation::InstructionStream::Instruction#writes_ivar?
+         5   (1.4%)           5   (1.4%)     SystemNavigation::InstructionStream::Instruction#accessing_ivar?
+         4   (1.1%)           4   (1.1%)     SystemNavigation::InstructionStream::Instruction#evals?
+         4   (1.1%)           4   (1.1%)     rescue in SystemNavigation::CompiledMethod#initialize
+         3   (0.8%)           3   (0.8%)     SystemNavigation::MethodHash#initialize
+       127  (35.7%)           2   (0.6%)     SystemNavigation::InstructionStream#iseqs
+       311  (87.4%)           2   (0.6%)     SystemNavigation::MethodQuery#evaluate
+         2   (0.6%)           2   (0.6%)     SystemNavigation::InstructionStream::Instruction::AttrWriterInstruction#visit
+       120  (33.7%)           1   (0.3%)     block in SystemNavigation::InstructionStream#iseqs
+       145  (40.7%)           1   (0.3%)     SystemNavigation::InstructionStream::Decoder#select_instructions
+        74  (20.8%)           1   (0.3%)     block in SystemNavigation::CompiledMethod#reads_field?
+        17   (4.8%)           1   (0.3%)     block in SystemNavigation::InstructionStream::Decoder#select_instructions
+        11   (3.1%)           1   (0.3%)     SystemNavigation::InstructionStream::Instruction#parse_op_id
+         6   (1.7%)           1   (0.3%)     SystemNavigation::InstructionStream::Instruction#parse_ivar
+         1   (0.3%)           1   (0.3%)     #<Module:0x007f51fe547b10>#split
+         1   (0.3%)           1   (0.3%)     SystemNavigation::InstructionStream::Instruction#dynamically_writes_ivar?
+         1   (0.3%)           1   (0.3%)     SystemNavigation::AncestorMethodFinder#initialize
+         1   (0.3%)           1   (0.3%)     SystemNavigation::MethodQuery#initialize
 =end
