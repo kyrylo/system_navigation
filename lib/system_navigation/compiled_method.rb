@@ -11,13 +11,13 @@ class SystemNavigation
 
       begin
         @source = FastMethodSource.source_for(@method)
-      rescue FastMethodSource::SourceNotFoundError, NoMethodError, Errno::ENOTDIR
+      rescue FastMethodSource::SourceNotFoundError, IOError
         @source = ''
       end
 
       begin
-        @comment = @method.comment
-      rescue FastMethodSource::SourceNotFoundError, NoMethodError, Errno::ENOTDIR
+        @comment = FastMethodSource.comment_for(@method)
+      rescue FastMethodSource::SourceNotFoundError, IOError
         @comment = ''
       end
     end
