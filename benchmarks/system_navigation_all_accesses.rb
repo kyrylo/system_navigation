@@ -4,18 +4,19 @@ require_relative '../lib/system_navigation'
 
 =begin
 Rehearsal ------------------------------------------------------
-#all_accesses - 1    2.390000   0.000000   2.390000 (  2.388984)
-#all_accesses - 5   12.040000   0.020000  12.060000 ( 12.053250)
-#all_accesses - 10  23.750000   0.020000  23.770000 ( 23.762558)
-#all_accesses - 20  46.930000   0.050000  46.980000 ( 46.935476)
--------------------------------------------- total: 85.200000sec
+#all_accesses - 1    1.120000   0.070000   1.190000 (  1.195386)
+#all_accesses - 5    5.800000   0.350000   6.150000 (  6.152076)
+#all_accesses - 10  12.630000   0.750000  13.380000 ( 13.378833)
+#all_accesses - 20  24.670000   1.530000  26.200000 ( 26.199472)
+-------------------------------------------- total: 46.920000sec
 
                          user     system      total        real
-#all_accesses - 1    2.420000   0.000000   2.420000 (  2.418456)
-#all_accesses - 5   11.690000   0.000000  11.690000 ( 11.682687)
-#all_accesses - 10  23.280000   0.040000  23.320000 ( 23.306703)
-#all_accesses - 20  45.950000   0.040000  45.990000 ( 45.955641)
-ruby benchmarks/system_navigation_all_accesses.rb  168.60s user 0.20s system 100% cpu 2:48.70 total
+#all_accesses - 1    1.200000   0.090000   1.290000 (  1.302716)
+#all_accesses - 5    6.130000   0.330000   6.460000 (  6.453621)
+#all_accesses - 10  12.000000   0.680000  12.680000 ( 12.671966)
+#all_accesses - 20  26.070000   1.490000  27.560000 ( 41.693160)
+                                                      ^ leaking memory here
+                                                   (fast_method_source's fault)
 =end
 
 sn = SystemNavigation.default
