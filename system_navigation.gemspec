@@ -24,6 +24,10 @@ Gem::Specification.new do |s|
     lib/system_navigation/method_query.rb
     lib/system_navigation/module_refinement.rb
     lib/system_navigation/ruby_environment.rb
+    VERSION
+    README.md
+    CHANGELOG.md
+    LICENCE.txt
   ]
   s.platform = Gem::Platform::RUBY
 
