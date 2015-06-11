@@ -31,7 +31,7 @@ Gem::Specification.new do |s|
   ]
   s.platform = Gem::Platform::RUBY
 
-  s.add_runtime_dependency 'fast_method_source', '~> 0.1'
+  s.add_runtime_dependency 'fast_method_source', '~> 0.3'
 
   s.add_development_dependency 'bundler', '~> 1.9'
   s.add_development_dependency 'rake', '~> 10.4'
