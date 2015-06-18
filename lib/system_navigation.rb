@@ -17,6 +17,11 @@ require_relative 'system_navigation/instruction_stream/decoder'
 require_relative 'system_navigation/instruction_stream/instruction'
 require_relative 'system_navigation/instruction_stream/instruction/attr_instruction'
 
+# SystemNavigation is a class that provides some introspection capabilities. It
+# is based on a Smalltalk class with a similar name. This is the only public
+# class in this library.
+#
+# @api public
 class SystemNavigation
   # The VERSION file must be in the root directory of the library.
   VERSION_FILE = File.expand_path('../../VERSION', __FILE__)
@@ -45,7 +50,7 @@ class SystemNavigation
   # Query methods for instance/global/class variables in descending (subclasses)
   # and ascending (superclasses) fashion.
   #
-  # @example Global
+  # @example Global scope
   #   class A
   #     def initialize
   #       @foo = 1
@@ -59,7 +64,7 @@ class SystemNavigation
   #   sn.all_accesses(to: :@foo)
   #   #=> [#<UnboundMethod: A#initialize>, #<UnboundMethod: B#foo>]
   #
-  # @example Local
+  # @example Local scope
   #   class A
   #     def initialize
   #       @foo = 1
@@ -85,7 +90,29 @@ class SystemNavigation
   #   end
   #
   #   sn.all_accesses(to: :@foo, only_get: true)
-  #   #=> [#<UnboundMethod: B#foo>]
+  #   #=> [#<UnboundMethod: B#initialize>]
+  #
+  # @example Only set invokations
+  #   class A
+  #     def initialize
+  #       @foo = 1
+  #     end
+  #   end
+  #
+  #   class B
+  #     attr_reader :foo
+  #   end
+  #
+  #   sn.all_accesses(to: :@foo, only_set: true)
+  #   #=> [#<UnboundMethod: A#initialize>]
+  #
+  # @example Accesses to global variables
+  #   sn.all_accesses(to: :$DEBUG)
+  #   #=> [#<UnboundMethod: Gem::Specification#inspect>, ...]
+  #
+  # @example Accesses to class variables
+  #   sn.all_accesses(to: :@@required_attributes)
+  #   #=> [#<UnboundMethod: Gem::Specification#validate>, ...]
   #
   # @param to [Symbol] The name of the instance/global/class variable to search
   #   for
@@ -100,6 +127,12 @@ class SystemNavigation
   #   the given scope
   # @note This is a very costly operation, if you don't provide the +from+
   #   argument
+  # @note This method _does_ _not_ perform _global_ queries,
+  #   only relative to +from+
+  # @raise [ArgumentError] if both +:only_get+ and +:only_set+ were provided
+  # @raise [TypeError] if +:from+ is not a class
+  # @raise [ArgumentError] if +:to+ is not a Symbol representing either of
+  #   these: class variable, instance variable, global variable
   def all_accesses(to:, from: nil, only_get: nil, only_set: nil)
     if only_set && only_get
       fail ArgumentError, 'both only_get and only_set were provided'
@@ -110,7 +143,7 @@ class SystemNavigation
     end
 
     unless to.match(VAR_TEMPLATE)
-      fail ArgumentError, 'invalid argument for to:'
+      fail ArgumentError, 'invalid argument for the `to:` attribute'
     end
 
     (from || BasicObject).with_all_sub_and_superclasses.flat_map do |klass|

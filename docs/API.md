@@ -20,7 +20,7 @@ The term `method` implies an instance of the `UnboundMethod` class.
 #### all_accesses(to:, from:, only_get:, only_set:)
 
 Returns an Array of all methods of the class `from` or its sub/superclasses that
-refer to the instance variable `to`.
+refer to the instance/global/class variable `to`.
 
 ```ruby
 class A
