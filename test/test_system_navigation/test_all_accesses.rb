@@ -17,7 +17,7 @@ class TestSystemNavigationAllCalls < Minitest::Test
       self.class.instance_method(__method__)
     ]
 
-   # assert_equal expected, @sn.all_accesses(to: :@test_all_accesses_to)
+    assert_equal expected, @sn.all_accesses(to: :@test_all_accesses_to)
   end
 
   def test_all_accesses_to_from

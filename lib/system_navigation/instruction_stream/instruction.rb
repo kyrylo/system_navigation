@@ -143,7 +143,7 @@ class SystemNavigation
       end
 
       def dynamically_reads_ivar?
-        @op_id == 'instance_variable_get'
+        self.op_id == 'instance_variable_get'
       end
 
       def dynamically_writes_ivar?
@@ -167,11 +167,11 @@ class SystemNavigation
       end
 
       def evals?
-        @op_id == 'eval'
+        self.op_id == 'eval'
       end
 
       def putstrings?(str)
-        return false unless @opcode == 'putstring'
+        return false unless self.opcode == 'putstring'
 
         s = str.inspect
 
@@ -188,7 +188,7 @@ class SystemNavigation
       def putobjects?(str)
         return false unless @opcode == 'putobject'
 
-        s = str.instance_of?(String) ? Regexp.escape(str) : str
+        s = (str.instance_of?(String) ? Regexp.escape(str) : str)
 
         return true if @operand.match(/(?::#{s}\z|\[.*:#{s},.*\])/)
         return true if @operand == str.inspect
@@ -197,20 +197,21 @@ class SystemNavigation
       end
 
       def putnils?(str)
-        return false unless @opcode == 'putnil'
+        return false unless self.opcode == 'putnil'
         @operand == str.inspect
       end
 
       def duparrays?(str)
-        !!(@opcode == 'duparray' && @operand.match(/:#{str}[,\]]/))
+        s = case str
+            when Array, Hash then Regexp.escape(str.inspect)
+            else str
+            end
+
+        !!(self.opcode == 'duparray' && @operand.match(/:#{s}[,\]]/))
       end
 
       def sends_msg?(message)
         !!(sending? && @op_id == message.to_s)
-      end
-
-      def operand
-        @operand
       end
 
       def evaling_str
@@ -228,6 +229,10 @@ class SystemNavigation
       def sending?
         @opcode == 'opt_send_without_block' || @opcode == 'send'
       end
+
+      protected
+
+      attr_reader :opcode, :op_id
     end
   end
 end
