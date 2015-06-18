@@ -44,17 +44,17 @@ class SystemNavigation
       ).as_array.uniq.count == 1
     end
 
-    def find_accessing_methods(ivar:, only_set:, only_get:)
+    def find_accessing_methods(var:, only_set:, only_get:)
       self.instance_and_singleton_do(
         for_all: proc { |_scope, _selectors, method|
           compiled_method = CompiledMethod.compile(method)
           if only_set
-            compiled_method.unwrap if compiled_method.writes_field?(ivar)
+            compiled_method.unwrap if compiled_method.writes_field?(var)
           elsif only_get
-            compiled_method.unwrap if compiled_method.reads_field?(ivar)
+            compiled_method.unwrap if compiled_method.reads_field?(var)
           else
-            if compiled_method.reads_field?(ivar) ||
-               compiled_method.writes_field?(ivar)
+            if compiled_method.reads_field?(var) ||
+               compiled_method.writes_field?(var)
               compiled_method.unwrap
             end
           end

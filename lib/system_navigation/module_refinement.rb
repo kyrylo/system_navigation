@@ -35,7 +35,7 @@ class SystemNavigation
         end
       end
 
-      def select_methods_that_access(ivar, only_get, only_set)
+      def select_methods_that_access(var, only_get, only_set)
         own_methods = self.own_methods
         if ancestor_methods.any?
           ancestor_methods.each do |methods|
@@ -48,7 +48,7 @@ class SystemNavigation
         MethodQuery.execute(
           collection: own_methods,
           query: :find_accessing_methods,
-          ivar: ivar,
+          var: var,
           only_get: only_get,
           only_set: only_set,
           behavior: self).as_array
@@ -207,10 +207,10 @@ class SystemNavigation
           query: :select_sent_messages)
       end
 
-      def which_selectors_store_into(ivar)
+      def which_selectors_store_into(var)
         self.selectors.select do |sel|
           meth = self.instance_method(sel)
-          meth.writes_field?(ivar)
+          meth.writes_field?(var)
         end
       end
 

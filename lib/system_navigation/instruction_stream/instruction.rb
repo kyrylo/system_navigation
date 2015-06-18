@@ -14,6 +14,7 @@ class SystemNavigation
         @lineno = nil
         @op_id = nil
         @ivar = nil
+        @gvar = nil
         @service_instruction = false
       end
 
@@ -25,7 +26,7 @@ class SystemNavigation
         parse_operand
         parse_lineno
         parse_op_id
-        parse_ivar
+        parse_var
 
         self
       end
@@ -57,7 +58,7 @@ class SystemNavigation
         elsif @raw.check(%r{/})
           @operand = @raw.scan(%r{/.*/})
         else
-          @operand = @raw.scan(/-?[0-9a-zA-Z:@_=.]+/)
+          @operand = @raw.scan(/-?[0-9a-zA-Z:@_=.$]+/)
 
           if @raw.peek(1) == ','
             @operand << @raw.scan(/[^\(]*/).rstrip
@@ -83,16 +84,35 @@ class SystemNavigation
         callinfo.terminate
       end
 
+      def parse_var
+        parse_ivar
+        parse_gvar
+      end
+
       def parse_ivar
         return unless accessing_ivar?
 
         ivar = StringScanner.new(@operand)
         @ivar = ivar.scan(/:[^,]+/)[1..-1].to_sym
         ivar.terminate
+        @ivar
+      end
+
+      def parse_gvar
+        return unless accessing_gvar?
+
+        gvar = StringScanner.new(@operand)
+        @gvar = gvar.scan(/[^,]+/).to_sym
+        gvar.terminate
+        @gvar
       end
 
       def accessing_ivar?
         @opcode == 'getinstancevariable' || @opcode == 'setinstancevariable'
+      end
+
+      def accessing_gvar?
+        @opcode == 'getglobal' || @opcode == 'setglobal'
       end
 
       def vm_operative?
@@ -113,6 +133,14 @@ class SystemNavigation
 
       def dynamically_writes_ivar?
         @op_id == 'instance_variable_set'
+      end
+
+      def reads_gvar?(gvar)
+        @opcode == 'getglobal' && @gvar == gvar
+      end
+
+      def writes_gvar?(gvar)
+        @opcode == 'setglobal' && @gvar == gvar
       end
 
       def evals?

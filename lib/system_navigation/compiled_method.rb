@@ -4,6 +4,10 @@ class SystemNavigation
       self.new(method).compile
     end
 
+    IVAR = /\A@[^@]/
+    CVAR = /\A@@/
+    GVAR = /\A\$/
+
     attr_reader :source
 
     def initialize(method)
@@ -49,12 +53,30 @@ class SystemNavigation
       exptree.includes?(literal)
     end
 
-    def reads_field?(ivar)
-      self.scan_for { @decoder.ivar_read_scan(ivar) }
+    def reads_field?(var)
+      case var
+      when IVAR
+        self.scan_for { @decoder.ivar_read_scan(var) }
+      when CVAR
+        self.scan_for { @decoder.cvar_read_scan(var) }
+      when GVAR
+        self.scan_for { @decoder.gvar_read_scan(var) }
+      else
+        raise ArgumentError, "unknown argument #{var}"
+      end
     end
 
-    def writes_field?(ivar)
-      self.scan_for { @decoder.ivar_write_scan(ivar) }
+    def writes_field?(var)
+      case var
+      when IVAR
+        self.scan_for { @decoder.ivar_write_scan(var) }
+      when CVAR
+        self.scan_for { @decoder.cvar_write_scan(var) }
+      when GVAR
+        self.scan_for { @decoder.gvar_write_scan(var) }
+      else
+        raise ArgumentError, "unknown argument #{var}"
+      end
     end
 
     def sends_message?(message)

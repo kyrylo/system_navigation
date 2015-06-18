@@ -35,13 +35,15 @@ class SystemNavigation
     self.new
   end
 
+  VAR_TEMPLATE = /\A[\$@]@?.+/
+
   def initialize
     @environment = SystemNavigation::RubyEnvironment.new
   end
 
   ##
-  # Query methods for instance variables in descending (subclasses) and
-  # ascending (superclasses) fashion.
+  # Query methods for instance/global/class variables in descending (subclasses)
+  # and ascending (superclasses) fashion.
   #
   # @example Global
   #   class A
@@ -85,15 +87,16 @@ class SystemNavigation
   #   sn.all_accesses(to: :@foo, only_get: true)
   #   #=> [#<UnboundMethod: B#foo>]
   #
-  # @param to [Symbol] The name of the instance variable to search for
+  # @param to [Symbol] The name of the instance/global/class variable to search
+  #   for
   # @param from [Class] The class that limits the scope of the query. Optional.
   #   If omitted, performs the query starting from the top of the object
   #   hierarchy (BasicObject)
   # @param only_get [Boolean] Limits the scope of the query only to methods that
-  #   write into the +ivar+. Optional. Mutually exclusive with +only_set+
+  #   write into the +var+. Optional. Mutually exclusive with +only_set+
   # @param only_set [Boolean] Limits the scope of the query only to methods that
-  #   read from the +ivar+. Optional. Mutually exclusive with +only_get+
-  # @return [Array<UnboundMethod>] methods that access the +ivar+ according to
+  #   read from the +var+. Optional. Mutually exclusive with +only_get+
+  # @return [Array<UnboundMethod>] methods that access the +var+ according to
   #   the given scope
   # @note This is a very costly operation, if you don't provide the +from+
   #   argument
@@ -104,6 +107,10 @@ class SystemNavigation
 
     if from && !from.instance_of?(Class)
       fail TypeError, "from must be a Class (#{from.class} given)"
+    end
+
+    unless to.match(VAR_TEMPLATE)
+      fail ArgumentError, 'invalid argument for to:'
     end
 
     (from || BasicObject).with_all_sub_and_superclasses.flat_map do |klass|
