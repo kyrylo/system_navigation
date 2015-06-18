@@ -2,7 +2,7 @@ SystemNavigation
 ==
 
 * [Repository](https://github.com/kyrylo/system_navigation/)
-* [Documentation](www.rubydoc.info/gems/system_navigation)
+* [Documentation](http://www.rubydoc.info/gems/system_navigation)
 
 Description
 -----------
