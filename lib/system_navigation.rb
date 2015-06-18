@@ -50,7 +50,7 @@ class SystemNavigation
   # Query methods for instance/global/class variables in descending (subclasses)
   # and ascending (superclasses) fashion.
   #
-  # @example Global scope
+  # @example Global scope (start search from BasicObject)
   #   class A
   #     def initialize
   #       @foo = 1
