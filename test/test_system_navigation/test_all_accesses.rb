@@ -697,4 +697,56 @@ class TestSystemNavigationAllCalls < Minitest::Test
                                             from: test_class,
                                             only_get: true)
   end
+
+  def test_all_accesses_to_class_variable
+    test_class = Class.new do
+      def test_all_accesses_to_class_variable_all_set
+        @@test_all_accesses_to_class_variable_all = 1
+      end
+
+      def test_all_accesses_to_class_variable_all_get
+        @@test_all_accesses_to_class_variable_all
+      end
+    end
+
+    expected = [
+      test_class.instance_method(:test_all_accesses_to_class_variable_all_set),
+      test_class.instance_method(:test_all_accesses_to_class_variable_all_get)
+    ]
+
+    assert_equal expected, @sn.all_accesses(to: :@@test_all_accesses_to_class_variable_all,
+                                            from: test_class)
+  end
+
+  def test_all_accesses_to_class_variable_set
+    test_class = Class.new do
+      def test_all_accesses_to_class_variable_set
+        @@test_all_accesses_to_class_variable_set = 1
+      end
+    end
+
+    expected = [
+      test_class.instance_method(:test_all_accesses_to_class_variable_set)
+    ]
+
+    assert_equal expected, @sn.all_accesses(to: :@@test_all_accesses_to_class_variable_set,
+                                            from: test_class,
+                                            only_set: true)
+  end
+
+  def test_all_accesses_to_class_variable_get
+    test_class = Class.new do
+      def test_all_accesses_to_class_variable_get
+        @@test_all_accesses_to_class_variable_get
+      end
+    end
+
+    expected = [
+      test_class.instance_method(:test_all_accesses_to_class_variable_get)
+    ]
+
+    assert_equal expected, @sn.all_accesses(to: :@@test_all_accesses_to_class_variable_get,
+                                            from: test_class,
+                                            only_get: true)
+  end
 end

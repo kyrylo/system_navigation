@@ -15,6 +15,7 @@ class SystemNavigation
         @op_id = nil
         @ivar = nil
         @gvar = nil
+        @cvar = nil
         @service_instruction = false
       end
 
@@ -87,6 +88,7 @@ class SystemNavigation
       def parse_var
         parse_ivar
         parse_gvar
+        parse_cvar
       end
 
       def parse_ivar
@@ -107,12 +109,25 @@ class SystemNavigation
         @gvar
       end
 
+      def parse_cvar
+        return unless accessing_cvar?
+
+        cvar = StringScanner.new(@operand)
+        @cvar = cvar.scan(/:[^,]+/)[1..-1].to_sym
+        cvar.terminate
+        @cvar
+      end
+
       def accessing_ivar?
         @opcode == 'getinstancevariable' || @opcode == 'setinstancevariable'
       end
 
       def accessing_gvar?
         @opcode == 'getglobal' || @opcode == 'setglobal'
+      end
+
+      def accessing_cvar?
+        @opcode == 'getclassvariable' || @opcode == 'setclassvariable'
       end
 
       def vm_operative?
@@ -141,6 +156,14 @@ class SystemNavigation
 
       def writes_gvar?(gvar)
         @opcode == 'setglobal' && @gvar == gvar
+      end
+
+      def reads_cvar?(cvar)
+        @opcode == 'getclassvariable' && @cvar == cvar
+      end
+
+      def writes_cvar?(cvar)
+        @opcode == 'setclassvariable' && @cvar == cvar
       end
 
       def evals?

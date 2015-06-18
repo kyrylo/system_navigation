@@ -54,6 +54,18 @@ class SystemNavigation
         end
       end
 
+      def cvar_read_scan(cvar)
+        self.select_instructions(literal: cvar) do |_prev_prev, prev, instruction|
+          next instruction if instruction.reads_cvar?(cvar)
+        end
+      end
+
+      def cvar_write_scan(cvar)
+        self.select_instructions(literal: cvar) do |prev_prev, prev, instruction|
+          next instruction if instruction.writes_cvar?(cvar)
+        end
+      end
+
       def literal_scan(literal)
         name = @scanner.method.original_name
 
