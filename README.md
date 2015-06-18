@@ -7,17 +7,17 @@ SystemNavigation
 Description
 -----------
 
-System Navigation is a Ruby library that provides capabilities for navigation
-and introspection of Ruby programs at runtime. Smalltalk users may recognise
-it. The library provides a group of useful methods that allow:
+SystemNavigation is a Ruby library that provides additional introspection
+capabilities for Ruby programs. The library defines a number of useful methods
+that allow querying:
 
-* finding instance, class or global variables in methods
-* finding literals such as numbers, strings, symbols, etc.
-* finding methods that contain a specific string (method source search)
-* finding classes and modules that implement given methods
-* finding classes and modules that send messages
-* finding all classes and modules in gems
-* and more...
+* methods for instance, class or global variables
+* methods for literals such as numbers, strings, symbols, etc.
+* methods for finding a specific string (method source search)
+* classes and modules that implement given methods
+* classes and modules that send messages
+* all classes and modules in gems
+* and many more...
 
 For the complete list of features please read the documentation or _read the
 tests_. All interaction with the library is done via the `SystemNavigation`
@@ -107,6 +107,11 @@ Limitations
 Supports *only* CRuby.
 
 * CRuby 2.2.2 and higher
+
+Credits
+-------
+
+* Inspired by Smalltalk
 
 License
 -------
