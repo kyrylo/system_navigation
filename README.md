@@ -58,7 +58,7 @@ sn.all_accesses(to: :@num, from: A)
 #=> [#<UnboundMethod: A#num>, #<UnboundMethod: A(M)#increment>, #<UnboundMethod: A#initialize>]
 ```
 
-### #all_implementors_of
+##### #all_implementors_of
 
 Find all classes and modules that implement the given message.
 
@@ -69,7 +69,7 @@ sn.all_implementors_of(:puts)
 #=> [ARGF.class, IO, Kernel, ..., YARD::Logger]
 ```
 
-### #all_calls
+##### #all_calls
 
 Find all methods in Bundler that invoke the `1` literal.
 
@@ -82,7 +82,7 @@ sn.all_calls(on: 1, gem: 'bundler')
 #=> [#<UnboundMethod: #<Class:Bundler>#with_clean_env>, #<UnboundMethod: #<Class:Bundler>#eval_gemspec>]
 ```
 
-### #all_objects
+##### #all_objects
 
 Retrieve all objects defined in the system.
 
