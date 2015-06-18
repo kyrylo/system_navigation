@@ -22,6 +22,7 @@ require_relative 'system_navigation/instruction_stream/instruction/attr_instruct
 # class in this library.
 #
 # @api public
+# @since 0.1.0
 class SystemNavigation
   # The VERSION file must be in the root directory of the library.
   VERSION_FILE = File.expand_path('../../VERSION', __FILE__)
@@ -36,11 +37,20 @@ class SystemNavigation
                  :all_behaviors, :all_classes, :all_classes_and_modules,
                  :all_modules, :all_objects
 
+  ##
+  # Creates a new instance of SystemNavigation. It is added for compatibility
+  # with Smalltalk users.
+  #
+  # @example
+  #   require 'system_navigation'
+  #
+  #   sn = SystemNavigation.default
   def self.default
     self.new
   end
 
   VAR_TEMPLATE = /\A[\$@]@?.+/
+  private_constant :VAR_TEMPLATE
 
   def initialize
     @environment = SystemNavigation::RubyEnvironment.new
@@ -49,6 +59,11 @@ class SystemNavigation
   ##
   # Query methods for instance/global/class variables in descending (subclasses)
   # and ascending (superclasses) fashion.
+  #
+  # @note This is a very costly operation, if you don't provide the +from+
+  #   argument
+  # @note This method _does_ _not_ perform _global_ queries,
+  #   only relative to +from+
   #
   # @example Global scope (start search from BasicObject)
   #   class A
@@ -125,10 +140,6 @@ class SystemNavigation
   #   read from the +var+. Optional. Mutually exclusive with +only_get+
   # @return [Array<UnboundMethod>] methods that access the +var+ according to
   #   the given scope
-  # @note This is a very costly operation, if you don't provide the +from+
-  #   argument
-  # @note This method _does_ _not_ perform _global_ queries,
-  #   only relative to +from+
   # @raise [ArgumentError] if both +:only_get+ and +:only_set+ were provided
   # @raise [TypeError] if +:from+ is not a class
   # @raise [ArgumentError] if +:to+ is not a Symbol representing either of
@@ -152,9 +163,22 @@ class SystemNavigation
   end
 
   ##
-  # Query methods for literals they call.
+  # Query methods for literals they call. The supported literals:
+  #   * Hashes (only simple Hashes that consist of literals itself)
+  #   * Arrays (only simple Arrays that consist of literals itself)
+  #   * +true+, +false+ and +nil+
+  #   * Integers (same Integers represented with different notations are treated
+  #     as the same number)
+  #   * Floats
+  #   * Strings
+  #   * Ranges
   #
-  # @example Global
+  # @note This is a very costly operation, if you don't provide the +from+
+  #   argument
+  # @note The list of supported literals can be found here:
+  #   http://ruby-doc.org/core-2.2.2/doc/syntax/literals_rdoc.html
+  #
+  # @example Global scope (every behaviour in this process)
   #   class A
   #     def foo
   #       :hello
@@ -170,7 +194,7 @@ class SystemNavigation
   #   sn.all_calls(on: :hello)
   #   #=> [#<UnboundMethod: A#foo>, #<UnboundMethod: B#bar>]
   #
-  # @example Local
+  # @example Local scope
   #   class A
   #     def foo
   #       :hello
@@ -198,10 +222,7 @@ class SystemNavigation
   # @param gem [String] Limits the scope of the query only to methods
   #   that are defined in the RubyGem +gem+ classes and modules. Optional.
   # @return [Array<UnboundMethod>] methods that call the given +literal+
-  # @note This is a very costly operation, if you don't provide the +from+
-  #   argument
-  # @note The list of supported literals can be found here:
-  #   http://ruby-doc.org/core-2.2.2/doc/syntax/literals_rdoc.html
+  # @raise [ArgumentError] if both keys (+from:+ and +gem:+) are given
   def all_calls(on:, from: nil, gem: nil)
     if from && gem
       fail ArgumentError, 'both from and gem were provided'
@@ -219,7 +240,7 @@ class SystemNavigation
   end
 
   ##
-  # Query classes for the methods they implement.
+  # Query classes for methods they implement.
   #
   # @example
   #   sn.all_classes_implementing(:~)
@@ -302,7 +323,7 @@ class SystemNavigation
   end
 
   ##
-  # Get all methods defined in current Ruby process.
+  # Get all methods defined in the current Ruby process.
   #
   # @example
   #   sn.all_methods
@@ -338,9 +359,8 @@ class SystemNavigation
   #     end
   #   end
   #
-  #
-  # sn.all_methods_with_source(string: 'hello_hi')
-  # #=> [#<UnboundMethod: B#bar>, #<UnboundMethod: A#foo>, #<UnboundMethod: M#foo>]
+  #   sn.all_methods_with_source(string: 'hello_hi')
+  #   #=> [#<UnboundMethod: B#bar>, #<UnboundMethod: A#foo>, #<UnboundMethod: M#foo>]
   #
   # @param string [String] The string to be searched for
   # @param match_case [Boolean] Whether to match case or not. Optional

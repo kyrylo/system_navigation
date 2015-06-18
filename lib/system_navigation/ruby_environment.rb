@@ -1,6 +1,12 @@
 class SystemNavigation
+  # @api private
+  # @since 0.1.0
   class RubyEnvironment
-    # Execute block on each class, metaclass, module and module's metaclass.
+    ##
+    # Execute +block+ on each class, metaclass, module and module's metaclass.
+    #
+    # @return [Enumerator] if +block+ was given
+    # @return [Enumerator] if +block+ is missing
     def all_behaviors(&block)
       enum = Enumerator.new do |y|
         ObjectSpace.each_object(Module) do |klass|
@@ -16,6 +22,11 @@ class SystemNavigation
       end
     end
 
+    ##
+    # Execute +block+ on each class (but not its metaclass).
+    #
+    # @return [Enumerator] if +block+ was given
+    # @return [Enumerator] if +block+ is missing
     def all_classes(&block)
       enum = Enumerator.new do |y|
         ObjectSpace.each_object(Class) do |klass|
@@ -30,6 +41,11 @@ class SystemNavigation
       end
     end
 
+    ##
+    # Execute +block+ on each class and module (but not their metaclasses).
+    #
+    # @return [Enumerator] if +block+ was given
+    # @return [Enumerator] if +block+ is missing
     def all_classes_and_modules(&block)
       enum = Enumerator.new do |y|
         ObjectSpace.each_object(Module) do |klass|
@@ -44,6 +60,11 @@ class SystemNavigation
       end
     end
 
+    ##
+    # Execute +block+ on each module (but not its metaclass).
+    #
+    # @return [Enumerator] if +block+ was given
+    # @return [Enumerator] if +block+ is missing
     def all_modules(&block)
       enum = Enumerator.new do |y|
         self.all_classes_and_modules.each do |klass|
@@ -58,10 +79,15 @@ class SystemNavigation
       end
     end
 
+    ##
+    # Execute +block+ on each object.
+    #
+    # @return [Enumerator] if +block+ was given
+    # @return [Enumerator] if +block+ is missing
     def all_objects(&block)
       enum = Enumerator.new do |y|
-        ObjectSpace.each_object do |klass|
-          y.yield klass
+        ObjectSpace.each_object do |obj|
+          y.yield obj
         end
       end
 
