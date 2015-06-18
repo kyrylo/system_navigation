@@ -188,7 +188,9 @@ class SystemNavigation
       def putobjects?(str)
         return false unless @opcode == 'putobject'
 
-        return true if @operand.match(/(?::#{str}\z|\[.*:#{str},.*\])/)
+        s = Regexp.escape(str)
+
+        return true if @operand.match(/(?::#{s}\z|\[.*:#{s},.*\])/)
         return true if @operand == str.inspect
 
         false
