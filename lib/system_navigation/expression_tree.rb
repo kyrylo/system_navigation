@@ -60,6 +60,8 @@ class SystemNavigation
     end
 
     def unify(node)
+      return unless node
+
       node.each do |n|
         if n.instance_of?(Array)
           if n.size == 2 && n.all? { |num| num.instance_of?(Fixnum) }

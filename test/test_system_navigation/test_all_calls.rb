@@ -499,6 +499,20 @@ class TestSystemNavigationAllCalls < Minitest::Test
                                from: test_class)
   end
 
+  def test_all_calls_on_from_empty_hash
+    test_class = Class.new do
+      def test_all_calls_on_from_empty_hash
+        {}
+      end
+    end
+
+    expected = [
+      test_class.instance_method(:test_all_calls_on_from_empty_hash)
+    ]
+
+    assert_equal expected, @sn.all_calls(on: {}, from: test_class)
+  end
+
   def test_all_calls_on_from_array
     test_class = Class.new do
       def test_all_calls_on_from_array
