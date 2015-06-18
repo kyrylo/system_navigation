@@ -4,6 +4,8 @@ class SystemNavigation
       self.new(method).compile
     end
 
+    attr_reader :source
+
     def initialize(method)
       @method = method
       @scanner = SystemNavigation::InstructionStream.on(method)
