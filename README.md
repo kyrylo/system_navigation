@@ -30,7 +30,7 @@ these places:
 Examples (full list in the documentation)
 --
 
-### #all_accesses
+##### #all_accesses
 
 Retrieve all methods that access instance variables in the given class/module
 including its ancestors and children.
