@@ -19,9 +19,10 @@ it. The library provides a group of useful methods that allow:
 * finding all classes and modules in gems
 * and more...
 
-For the complete list of features please read the documentation. All interaction
-with the library is done via the `SystemNavigation` class and its class
-methods. The description of the methods can be found in these places:
+For the complete list of features please read the documentation or _read the
+tests_. All interaction with the library is done via the `SystemNavigation`
+class and its class methods. The description of the methods can be found in
+these places:
 
 * [SystemNavigation](http://www.rubydoc.info/gems/system_navigation/SystemNavigation)
 * [SystemNavigation::RubyEnvironment](http://www.rubydoc.info/gems/system_navigation/SystemNavigation/RubyEnvironment)
