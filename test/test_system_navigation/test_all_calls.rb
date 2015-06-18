@@ -218,8 +218,8 @@ class TestSystemNavigationAllCalls < Minitest::Test
     ]
 
     assert_equal expected,
-                 @sn.all_accesses(to: :test_all_calls_on_from_attr_accessor_singleton,
-                                  from: test_class)
+                 @sn.all_calls(on: :test_all_calls_on_from_attr_accessor_singleton,
+                               from: test_class)
   end
 
   def test_all_calls_on_from_symbol_array_and_hash
