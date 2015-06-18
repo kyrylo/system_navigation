@@ -4,11 +4,11 @@ require_relative '../lib/system_navigation'
 
 =begin
 Rehearsal ----------------------------------------------------------
-#all_senders_of(:puts)   2.340000   0.010000   2.350000 (  2.352055)
-------------------------------------------------- total: 2.350000sec
+#all_senders_of(:puts)   0.510000   0.010000   0.520000 (  0.514385)
+------------------------------------------------- total: 0.520000sec
 
                              user     system      total        real
-#all_senders_of(:puts)   2.310000   0.000000   2.310000 (  2.311983)
+#all_senders_of(:puts)   0.480000   0.010000   0.490000 (  0.498999)
 =end
 
 sn = SystemNavigation.default

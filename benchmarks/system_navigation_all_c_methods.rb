@@ -4,11 +4,11 @@ require_relative '../lib/system_navigation'
 
 =begin
 Rehearsal --------------------------------------------------
-#all_c_methods   2.000000   0.000000   2.000000 (  2.003585)
------------------------------------------ total: 2.000000sec
+#all_c_methods   0.160000   0.020000   0.180000 (  0.169852)
+----------------------------------------- total: 0.180000sec
 
                      user     system      total        real
-#all_c_methods   2.140000   0.000000   2.140000 (  2.142253)
+#all_c_methods   0.140000   0.020000   0.160000 (  0.158081)
 =end
 
 sn = SystemNavigation.default
