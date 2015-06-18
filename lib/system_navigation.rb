@@ -284,6 +284,9 @@ class SystemNavigation
   ##
   # Query gems for classes they implement.
   #
+  # @note This method is not precise. If a class/method in the given gem does
+  #   not implement any methods, it won't be included in the result.
+  #
   # @example
   #   sn.all_classes_in_gem_named('system_navigation')
   #   #=> [SystemNavigation::AncestorMethodFinder, ..., SystemNavigation]
@@ -298,6 +301,9 @@ class SystemNavigation
   ##
   # Query gems for modules they implement.
   #
+  # @note This method is not precise. If a class/method in the given gem does
+  #   not implement any methods, it won't be included in the result.
+  #
   # @example
   #   sn.all_modules_in_gem_named('pry-theme')
   #   #=> [PryTheme::Theme::DefaultAttrs, ..., PryTheme]
@@ -310,6 +316,9 @@ class SystemNavigation
 
   ##
   # Query gems for classes and modules they implement.
+  #
+  # @note This method is not precise. If a class/method in the given gem does
+  #   not implement any methods, it won't be included in the result.
   #
   # @example
   #   sn.all_classes_and_modules_in_gem_named('pry-theme')
