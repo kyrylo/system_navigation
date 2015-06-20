@@ -2,8 +2,8 @@ Gem::Specification.new do |s|
   s.name         = 'system_navigation'
   s.version      = File.read('VERSION')
   s.date         = Time.now.strftime('%Y-%m-%d')
-  s.summary      = ''
-  s.description  = ''
+  s.summary      = 'A library that provides additional introspection capabilities for Ruby programs'
+  s.description  = 'A library that provides additional introspection capabilities for Ruby programs (allows various queries on methods and classes)'
   s.author       = 'Kyrylo Silin'
   s.email        = 'silin@kyrylo.org'
   s.homepage     = 'https://github.com/kyrylo/system_navigation'
