@@ -440,4 +440,18 @@ class SystemNavigation
       klassmod.all_messages.as_array
     end.uniq
   end
+
+  ##
+  # Get all methods (public, private, protected) that are defined on +behavior+.
+  #
+  # @since 0.2.1
+  # @example
+  #   sn.all_methods_in_behavior(System)
+  #   #=> {:public => {:instance => [...], :singleton => [...]}, ...}
+  #
+  # @param behavior [Module, Class] where to read methods from
+  # @return [Hash] a hash with UnboundMethods, divided into groups and scopes
+  def all_methods_in_behavior(behavior)
+    behavior.own_methods.to_h
+  end
 end
