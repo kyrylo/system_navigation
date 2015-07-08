@@ -4,7 +4,6 @@ class SystemNavigation
       self.new(args)
     end
 
-
     def initialize(based_on: nil, include_super: nil)
       @hash = super()
 
